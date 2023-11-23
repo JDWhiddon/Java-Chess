@@ -1,0 +1,200 @@
+symbol = type of piece
+
+Initialize Process:
+* Create piece object with coordinate data
+	- Constructor takes in inital coords and assigns a symbol
+	- All pieces are derived from class piece and inherits its methods
+* Convert the coordinate data of a piece to the appropiate locations
+* Store all piece objects into a container
+	- Ensure coordinate data (at the appropiate location) and symbol data are easily grabable
+* Place piece object using coordinate data 
+	- Use a piece object's getters to obtain coordinate data
+	- Place a symbol representing the piece
+
+Move Process:
+* Select a piece at a given coordinate
+	- Find a set of coordinates (at the appropiate location)
+	- Obtain the symbol data
+* Compare the symbol to a list of pieces of the same type to obtain the specific piece
+	- Take in a symbol and a set of coordinates (at the appropiate location)
+	- Call a container that finds all the pieces of a selected symbol
+	- Compare the set of coords with the coords of the symbol (both at the appropiate location)
+	- return the piece to be used
+* Piece can be deselected at any time to a deselected state
+* Detect possible collisions before making a move
+	- Using a piece object's set of valid moves, highlight all the spaces that it can move
+		- If the space the piece can move is off the grid, set the maximum 
+		of the number of possible move spaces of a given valid move to be on the grid
+	- Valid move interactions:
+		- Use the following rules based on the maximum move value for Rook, Bishop, and Queen:
+			- Set the maximum move value in that direction to be the coordinate value of
+			the first piece in the line of sight of the selected piece
+			- Capture selected piece (Use capture process)
+		- Other cases:
+			- King: 
+				- Capture selected piece (Use capture process)
+				- Movement is fixed to one
+				- Treat the potential space at an enemy piece's line of sight 
+				as a wall (less than the maximum move value) 
+				- From the starting position (eY), castle at cY or gY if a
+				Rook is present at aY or hY respectively. Rook is moved to
+				dY or fY respectively. Any of the spaces must not be in
+				enemy line of sight (Castling)
+			- Knight: 
+				- Capture selected piece (Use capture process)
+				- Movement is fixed to an "L shaped" move  (2 in one straight 
+				direction and 1 on either perpendicular direction)
+			- Pawn: 
+				- From the starting position set the maximum move value to 2
+				- Other positions movement is fixed to one
+				- Move diagonally by one and capture selected piece (Use capture process)
+				if a piece is detected
+				- If any piece is in the forward line of sight at any position, treat
+				as a wall (less than the maximum move value)
+				- If an enemy pawn moved two in the previous turn from its starting position,
+				move diagonally by one to where the pawn is behind the enemy pawn and
+				capture selected piece (En Passant)
+				- If a pawn reaches the end at an enemy side of the board (x1 or x8), 
+				promote to Rook, Queen, Knight, or Bishop (Use promotion process)
+* Move the piece using the translated coordinates from the user input
+* If a move is successful, translate the move to chess notation to be displayed on another window
+
+Symbols and valid moves:
+* Rook:
+	- Direction: N, E, S, W;
+	- Max spaces moved: 7
+	- Limited by: 
+		- Capture at line of sight
+		- Collision with pieces of the same team
+		- The board bounds
+	- Symbol: R
+* Bishop:
+	- Direction: NE, SE, SW, NW;
+	- Max spaces moved: 7
+	- Limited by: 
+		- Capture at line of sight
+		- Collision with pieces of the same team
+		- The board bounds
+	- Symbol: B
+* Queen:
+	- Direction: N, NE, E, SE, S, SW, W, NW;
+	- Max spaces moved: 7
+	- Limited by:
+		- Capture at line of sight
+		- Collision with pieces of the same team
+		- The board bounds
+	- Symbol: Q
+* Knight:
+	- Direction: 2N1W, 2N1E, 2E1N, 2E1S, 2S1W, 2S1E, 2W1N, 2W1S
+	- Max spaces moved: 2 straight + 1 either side
+	- Limited by:
+		- Collision with pieces of the same team
+		- The board bounds
+	- Symbol: N
+* Pawn:
+	- Direction: N, NE (capture/en passant), NW (capture/en passant);
+	- Max spaces moved: 1 (2 at starting position)
+	- Limited by:
+		- Capture at line of sight
+		- Collision with pieces of the same team
+		- The board bounds
+		- Being checked or potentially being checked
+	- Symbol: K
+* King:
+	- Direction: N, NE, E, SE, S, SW, W, NW, Castle left/right;
+	- Max spaces moved: 1
+	- Limited by:
+		- Capture at line of sight
+		- Collision with pieces of the same team
+		- The board bounds
+		- Being checked or potentially being checked
+	- Symbol: K
+				
+Promotion Process (WIP):
+* Replace the pawn piece
+	- In the container, maintain the position of the pawn piece and use that position
+	to place a piece of the promoted type in its place
+	- All coordinate and ID (if used) data are maintained while symbol is replaced
+* Place new piece object using coordinate data 
+	- Use a piece object's getters to obtain coordinate data
+	- Place a symbol representing the piece
+
+Capture Process:
+* Select a piece at a given coordinate
+	- Find a set of coordinates (at the appropiate location)
+	- Obtain the symbol data
+* Compare the symbol to a list of pieces of the same type to obtain the specific piece
+	- Take in a symbol and a set of coordinates (at the appropiate location)
+	- Call a container that finds all the pieces of a selected symbol
+	- Compare the set of coords with the coords of the symbol (both at the appropiate location)
+	- return the piece to be used
+* Piece can be deselected at any time to a deselected state
+* Place the captured piece into the capturing player's capture container
+	- Take in a symbol
+	- Calculate the score
+* Remove and replace the captured piece on the board with the capturing piece
+
+Check Process (WIP):
+* Detect all spaces that a King could move
+* At a detected space, detect all the valid moves other pieces may make to reach that space
+	- Highlight all the spaces of enemy valid moves
+* Prevent a King from moving to the detected space if an enemy space 
+
+Coordinate conversion Process:
+* Maintain the board x coord to start at the left, swap the board y coord to start at the bottom
+	- a1 (arr[7][0]) is the bottom left corner, h8 (arr[0][7]) is the upper right corner
+* If the board starts at arr[0][0], subtract any incoming x or y coords by 1, otherwise leave as is if arr[1][1]
+	- a8 is arr[0][0], input coords as int (1,8), or input coords as chess notation (a,8)
+* If the boord is flipped, the board x coord starts at the right and the board y coord starts at the top
+
+FlipBoard Process (WIP):
+* The starting coord arr[y][x] will be swapped with arr[7 - y][7 - x]
+	- arr[0][0] will take values from arr[7][7]
+* In the container holding each piece, update the coordinates to reflect the FlipBoard changes
+* The board will place the pieces in the new positions
+* Each movement will be from the current player's perspective
+* The board flips at the end of each turn
+
+Checkerboard algorithm (arrays) (text):
+for (int i = 0; i < SIZE; i++) {
+	for (int j = 0; j < SIZE; j++) {
+		if((j % 2 == 0) && (i % 2 == 0)){
+			board[i][j] = ' ';  // Blank space
+		}
+		else if((j % 2 != 0) && (i % 2 != 0)){
+			board[i][j] = ' ';  // Blank space
+		}
+		else{
+			board[i][j] = '#';  // Colored space
+		}
+	}
+}
+
+FlipBoard algorithm (board only, WIP):
+SIZE = 8;
+
+// Integer i is the y value
+// Integer j is the x value
+
+// Flip the board horizontally
+for (int y = 0; i < SIZE / 2; i++) 
+{
+	for (int j = 0; j < SIZE; j++) 
+	{
+		char temp = board[i][j];
+		board[i][j] = board[SIZE - 1 - i][j];
+		board[SIZE - 1 - i][j] = temp;
+	}
+}
+
+// Flip the board vertically
+for (int i = 0; i < SIZE; i++) 
+{
+	for (int j = 0; j < SIZE / 2; j++) 
+	{
+		char temp = board[i][j];
+		board[i][j] = board[i][SIZE - 1 - j];
+		board[i][SIZE - 1 - j] = temp;
+	}
+}
+   
