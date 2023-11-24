@@ -82,6 +82,20 @@ public class ChessFrame extends JFrame {
     // Sets up the board
     // TestGameSetup();
   }
+  
+  // To reset the JPanel Backgrounds
+  private void ResetBoardBackground() {
+	for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if ((j % 2 == 0) && (i % 2 == 0))
+          playSquare[i][j].setBackground(cream);
+        else if ((j % 2 != 0) && (i % 2 != 0))
+          playSquare[i][j].setBackground(cream);
+        else
+          playSquare[i][j].setBackground(green);
+      }
+    }
+  }
 
   // Initialize pieces on the board
   private void DefaultGameSetup() {
@@ -178,6 +192,7 @@ public class ChessFrame extends JFrame {
   // Text input only
 
   // Designed to be as compatible for different types of selection
+  // selectPiece always generates a new copied piece based on the recent selection
   public void selectPiece(int x, int y) {
     // A copiedPiece needs to be passed through several methods without being needed
     // as a parameter
@@ -205,16 +220,7 @@ public class ChessFrame extends JFrame {
 
     // Resets the background of each square, so that the moves reset when
     // deselecting a piece
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        if ((j % 2 == 0) && (i % 2 == 0))
-          playSquare[i][j].setBackground(cream);
-        else if ((j % 2 != 0) && (i % 2 != 0))
-          playSquare[i][j].setBackground(cream);
-        else
-          playSquare[i][j].setBackground(green);
-      }
-    }
+    ResetBoardBackground();
 
     Color validMoveColor = new Color(255, 255, 0);
     for (int[] coordinates : coordinatesList) {
@@ -361,12 +367,12 @@ public class ChessFrame extends JFrame {
                   MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1,8 -i);
                   System.out.println("NEw X should be: " + (j + 1)+ "New y should be: " + (8 - i));
                   System.out.println("After Move: x = " + copiedPiece.GetXCoord() + ", y = " + copiedPiece.GetYCoord());
+				  ResetBoardBackground();
                 }
               }
             }
 
       }
-
     }
 
     public void mousePressed(MouseEvent e) {
