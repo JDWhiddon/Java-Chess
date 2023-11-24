@@ -82,10 +82,10 @@ public class ChessFrame extends JFrame {
     // Sets up the board
     // TestGameSetup();
   }
-  
+
   // To reset the JPanel Backgrounds
   private void ResetBoardBackground() {
-	for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
         if ((j % 2 == 0) && (i % 2 == 0))
           playSquare[i][j].setBackground(cream);
@@ -184,9 +184,9 @@ public class ChessFrame extends JFrame {
   }
 
   // Used for testing methods
-  public void ChessMethodTester() {
-    MovePiece(copiedPiece);
-  }
+  // public void ChessMethodTester() {
+  // MovePiece(copiedPiece);
+  // }
 
   // (1,1) is the bottom left, (8,8) is the top left on the white side perspective
   // Text input only
@@ -199,7 +199,7 @@ public class ChessFrame extends JFrame {
     copiedPiece = new NullPiece(1, 1, 'N');
     TranslateCoordinates(x, y);
     for (int i = 0; i < numPieces; i++) {
-      if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()) {
+      if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord() && ChessPieceContainer[i].IsAlive()) {
         // From java.lang.Class<T>, using .getClass().getName()
         // JOptionPane.showMessageDialog(null, "Selected Piece: " +
         // ChessPieceContainer[i].getClass().getName());
@@ -230,16 +230,23 @@ public class ChessFrame extends JFrame {
   }
 
   public void MakeMove(int x, int y, int newX, int newY) {
+    for (int i = 0; i < 32; i++) {
+      // Checks to see if the piece moved on top of another, and removes it if so
+      if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY) {
+        ChessPieceContainer[i].RemovePiece();
+        System.out.println("Piece taken!");
+      }
+    }
     copiedPiece.SetYCoord(newY);
     copiedPiece.SetXCoord(newX);
     UpdatePieces();
   }
 
-  public void MovePiece(ChessPiece selectedPiece) {
-    selectedPiece.Move(selectedPiece.GetXCoord(), selectedPiece.GetYCoord());
+  // public void MovePiece(ChessPiece selectedPiece) {
+  // selectedPiece.Move(selectedPiece.GetXCoord(), selectedPiece.GetYCoord());
 
-    UpdatePieces();
-  }
+  // UpdatePieces();
+  // }
 
   // Needed to update the board after a piece is moved
   public void UpdatePieces() {
@@ -254,10 +261,12 @@ public class ChessFrame extends JFrame {
     // May add an if statement to detect if a piece is captured or not to not draw
     // it on the board
     for (int i = 0; i < numPieces; i++) {
-      TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
-      playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
-      // Experimental, may be unused
-      ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
+      if (ChessPieceContainer[i].IsAlive()) {
+        TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
+        playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+        // Experimental, may be unused
+        ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
+      }
     }
 
     // Update any changes
@@ -363,11 +372,9 @@ public class ChessFrame extends JFrame {
             if (e.getSource() == playSquare[i][j]) {
               for (int[] coordinates : SelectedCoordinatesList) {
                 if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
-                  System.out.println("Before Move: x = " + copiedPiece.GetXCoord() + ", y = " + copiedPiece.GetYCoord());
-                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1,8 -i);
-                  System.out.println("NEw X should be: " + (j + 1)+ "New y should be: " + (8 - i));
-                  System.out.println("After Move: x = " + copiedPiece.GetXCoord() + ", y = " + copiedPiece.GetYCoord());
-				  ResetBoardBackground();
+                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i);
+                  ResetBoardBackground();
+                  UpdatePieces();
                 }
               }
             }

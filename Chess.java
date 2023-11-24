@@ -6,6 +6,5 @@ public class Chess {
     chessFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     chessFrame.setSize(600, 600);
     chessFrame.setVisible(true);
-    chessFrame.ChessMethodTester();
   }
 }

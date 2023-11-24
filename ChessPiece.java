@@ -10,6 +10,7 @@ public abstract class ChessPiece {
   protected int yCoord;
   protected char symbol = ' ';
   protected char playerSide = ' ';
+  protected boolean isAlive = true;
   // May mess with the JLabels in each specific JPanel later
   protected JLabel jlabelCopy;
 
@@ -66,6 +67,14 @@ public abstract class ChessPiece {
 
   public void SetJLabel(JLabel label) {
     jlabelCopy = label;
+  }
+
+  public void RemovePiece() {
+    isAlive = false;
+  }
+
+  public boolean IsAlive() {
+    return isAlive;
   }
 }
 
