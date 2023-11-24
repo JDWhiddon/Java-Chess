@@ -100,6 +100,70 @@ class Queen extends ChessPiece {
   public char GetSymbol() {
     return symbol;
   }
+  
+  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	int leftBound = 1;
+    int rightBound = 8;
+    int lowerBound = 1;
+    int upperBound = 8;
+    int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
+	
+    if (playerSide == 'W') {
+	  // Going -> Top
+	  for(int i = 1; i <= upperMax; i++){
+        coordinatesList.add(new int[] { x, y + i});
+	  }
+	  // Going -> Bottom
+	  for(int i = 1; i <= lowerMax; i++){
+        coordinatesList.add(new int[] { x, y - i});
+	  }
+	  // Going -> Right
+	  for(int i = 1; i <= rightMax; i++){
+        coordinatesList.add(new int[] { x + i, y });
+	  }
+	  // Going -> Left
+	  for(int i = 1; i <= leftMax; i++){
+        coordinatesList.add(new int[] { x - i, y });
+	  }
+	  // Going -> Top Right
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Right
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y - i });
+		  }
+	    }
+	  }
+	  // Going -> Top Left
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Left
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y - i });
+		  }
+	    }
+	  }
+    } 
+    return coordinatesList;
+  }
 
   public void ValidMoves(int x, int y) {
     System.out.println("Test");
@@ -110,7 +174,6 @@ class Queen extends ChessPiece {
   }
 }
 
-// The Rook will be implemented first
 class Rook extends ChessPiece {
   private char symbol = 'R';
   private int maxMovement = 7;
@@ -122,26 +185,58 @@ class Rook extends ChessPiece {
   public char GetSymbol() {
     return symbol;
   }
+  
+  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	int leftBound = 1;
+    int rightBound = 8;
+    int lowerBound = 1;
+    int upperBound = 8;
+    int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
+	
+    if (playerSide == 'W') {
+	  // Going -> Top
+	  for(int i = 1; i <= upperMax; i++){
+        coordinatesList.add(new int[] { x, y + i});
+	  }
+	  // Going -> Bottom
+	  for(int i = 1; i <= lowerMax; i++){
+        coordinatesList.add(new int[] { x, y - i});
+	  }
+	  // Going -> Right
+	  for(int i = 1; i <= rightMax; i++){
+        coordinatesList.add(new int[] { x + i, y });
+	  }
+	  // Going -> Left
+	  for(int i = 1; i <= leftMax; i++){
+        coordinatesList.add(new int[] { x - i, y });
+	  }
+    } 
+    return coordinatesList;
+  }
 
   // Reads in the current xCoord and yCoord and calculates the maximum distance
   // per move
   public void ValidMoves(int x, int y) {
-    // xCoord = x;
-    // yCoord = y;
-    // Example plan for a Rook at (4,4)
-    // Max movement is 7 at any given direction
-    // E: (1,4); xCoord change: 4 - 1 (left max); Moves 3 left maximum
-    // W: (8,4); xCoord change: (8 - 1) (right max) - 3; Moves 4 right maximum
-    // N: (4,1); yCoord change: 4 - 1 (bottom max); Moves 3 down maximum
-    // S: (4,8); yCoord change: (8 - 1) (top max) - 3; Moves 4 up maximum
-    // int leftBound = 1;
-    // int rightBound = 7;
-    // int lowerBound = 1;
-    // int upperBound = 7;
-    // int leftMax = x - leftBound;
-    // int rightMax = rightBound - x;
-    // int lowerMax = y - lowerBound;
-    // int upperMax = upperBound - y;
+    /* xCoord = x;
+       yCoord = y;
+       Example plan for a Rook at (4,4)
+       Max movement is 7 at any given direction
+       E: (1,4); xCoord change: 4 - 1 (left max); Moves 3 left maximum
+       W: (8,4); xCoord change: (8 - 1) (right max) - 3; Moves 4 right maximum
+       N: (4,1); yCoord change: 4 - 1 (bottom max); Moves 3 down maximum
+       S: (4,8); yCoord change: (8 - 1) (top max) - 3; Moves 4 up maximum
+       int leftBound = 1;
+       int rightBound = 7;
+       int lowerBound = 1;
+       int upperBound = 7;
+       int leftMax = x - leftBound;
+       int rightMax = rightBound - x;
+       int lowerMax = y - lowerBound;
+       int upperMax = upperBound - y; */
   }
 
   public void Move(int x, int y) {
@@ -197,6 +292,54 @@ class Bishop extends ChessPiece {
     return symbol;
   }
 
+  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	int leftBound = 1;
+    int rightBound = 8;
+    int lowerBound = 1;
+    int upperBound = 8;
+    int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
+	
+    if (playerSide == 'W') {
+	  // Going -> Top Right
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Right
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y - i });
+		  }
+	    }
+	  }
+	  // Going -> Top Left
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Left
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y - i });
+		  }
+	    }
+	  }
+    } 
+    return coordinatesList;
+  }
+
   public void ValidMoves(int x, int y) {
     System.out.println("Test");
   }
@@ -215,6 +358,38 @@ class Knight extends ChessPiece {
 
   public char GetSymbol() {
     return symbol;
+  }
+
+  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	int leftBound = 1;
+    int rightBound = 8;
+    int lowerBound = 1;
+    int upperBound = 8;
+    int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
+	
+    if (playerSide == 'W') {
+	  // Going -> 2 Top + 1 Direction
+	  for(int i = 1; i <= upperMax; i++){
+        coordinatesList.add(new int[] { x, y + i});
+	  }
+	  // Going -> 2 Right + 1 Direction
+	  for(int i = 1; i <= lowerMax; i++){
+        coordinatesList.add(new int[] { x, y - i});
+	  }
+	  // Going -> 2 Bottom + 1 Direction
+	  for(int i = 1; i <= rightMax; i++){
+        coordinatesList.add(new int[] { x + i, y });
+	  }
+	 // Going -> 2 Left + 1 Direction
+	  for(int i = 1; i <= leftMax; i++){
+        coordinatesList.add(new int[] { x - i, y });
+	  }
+    } 
+    return coordinatesList;
   }
 
   public void ValidMoves(int x, int y) {
