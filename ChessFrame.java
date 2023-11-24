@@ -42,6 +42,9 @@ public class ChessFrame extends JFrame {
   /* Extracted coords from ChessPiece object */
   private static int xCoord;
   private static int yCoord;
+  /* Valid moves from the selected piece */
+  ArrayList<int[]> SelectedCoordinatesList;
+
   /* For any scanner input */
   Scanner userInput = new Scanner(System.in);
   /* For the board */
@@ -168,22 +171,11 @@ public class ChessFrame extends JFrame {
 
   // Used for testing methods
   public void ChessMethodTester() {
-    manualSelectCoords();
     MovePiece(copiedPiece);
   }
 
   // (1,1) is the bottom left, (8,8) is the top left on the white side perspective
   // Text input only
-  public void manualSelectCoords() {
-    // Implemented mouse clicking to select piece, don't think we need this anymore
-
-    // String firstCoord = JOptionPane.showInputDialog("Select x Coord: ");
-    // String secondCoord = JOptionPane.showInputDialog("Select y Coord: ");
-    // int x = Integer.parseInt(firstCoord);
-    // int y = Integer.parseInt(secondCoord);
-
-    // selectPiece(x, y);
-  }
 
   // Designed to be as compatible for different types of selection
   public void selectPiece(int x, int y) {
@@ -211,7 +203,8 @@ public class ChessFrame extends JFrame {
     int pivotyCoord = copiedPiece.GetYCoord();
     ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(playSquare, pivotxCoord, pivotyCoord);
 
-    //Resets the background of each square, so that the moves reset when deselecting a piece
+    // Resets the background of each square, so that the moves reset when
+    // deselecting a piece
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
         if ((j % 2 == 0) && (i % 2 == 0))
@@ -225,14 +218,20 @@ public class ChessFrame extends JFrame {
 
     Color validMoveColor = new Color(255, 255, 0);
     for (int[] coordinates : coordinatesList) {
-      System.out.println("X: " + coordinates[0] + "Y: " + coordinates[1]);
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
 
   }
 
+  public void MakeMove(int x, int y, int newX, int newY) {
+    copiedPiece.SetYCoord(newY);
+    copiedPiece.SetXCoord(newX);
+    UpdatePieces();
+  }
+
   public void MovePiece(ChessPiece selectedPiece) {
     selectedPiece.Move(selectedPiece.GetXCoord(), selectedPiece.GetYCoord());
+
     UpdatePieces();
   }
 
@@ -343,11 +342,31 @@ public class ChessFrame extends JFrame {
     }
 
     public void mouseClicked(MouseEvent e) {
-      for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
-          if (e.getSource() == playSquare[i][j]) {
-            selectPiece(j + 1, 8 - i);
-          }
+      if (isSelected == false) {
+        for (int i = 0; i < 8; i++)
+          for (int j = 0; j < 8; j++)
+            if (e.getSource() == playSquare[i][j]) {
+              selectPiece(j + 1, 8 - i);
+              isSelected = true;
+              SelectedCoordinatesList = copiedPiece.ValidMoves(playSquare, j + 1, 8 - i);
+            }
+      } else {
+        isSelected = false;
+        for (int i = 0; i < 8; i++)
+          for (int j = 0; j < 8; j++)
+            if (e.getSource() == playSquare[i][j]) {
+              for (int[] coordinates : SelectedCoordinatesList) {
+                if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
+                  System.out.println("Before Move: x = " + copiedPiece.GetXCoord() + ", y = " + copiedPiece.GetYCoord());
+                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1,8 -i);
+                  System.out.println("NEw X should be: " + (j + 1)+ "New y should be: " + (8 - i));
+                  System.out.println("After Move: x = " + copiedPiece.GetXCoord() + ", y = " + copiedPiece.GetYCoord());
+                }
+              }
+            }
+
+      }
+
     }
 
     public void mousePressed(MouseEvent e) {
