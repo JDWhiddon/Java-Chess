@@ -18,6 +18,12 @@ public abstract class ChessPiece{
     yCoord = y;
 	playerSide = ps;
   }
+  
+  // Reads in the current xCoord and yCoord and calculates the maximum distance per move
+  // or the valid positions if applicable
+  public abstract void ValidMoves(int x, int y);
+  
+  public abstract void Move(int x, int y);
 
   public int GetXCoord(){
 	return xCoord;
@@ -29,6 +35,10 @@ public abstract class ChessPiece{
   
   public char GetPlayerSide(){
 	return playerSide;
+  }
+  
+  public JLabel GetJLabel(){
+	return jlabelCopy;
   }
 
   public abstract char GetSymbol();
@@ -48,10 +58,6 @@ public abstract class ChessPiece{
   public void SetJLabel(JLabel label){
 	jlabelCopy = label;
   }
-  
-  // Reads in the current xCoord and yCoord and calculates the maximum distance per move
-  // or the valid positions if applicable
-  public abstract void ValidMoves(int x, int y);
 }
 
 // Derived classes temporarily here for now
@@ -69,6 +75,10 @@ class King extends ChessPiece{
   public void ValidMoves(int x, int y){
 	System.out.println("Test");
   }
+  
+  public void Move(int x, int y){
+	System.out.println("Test");
+  }
 }
 
 class Queen extends ChessPiece{
@@ -83,6 +93,10 @@ class Queen extends ChessPiece{
   }
   
   public void ValidMoves(int x, int y){
+	System.out.println("Test");
+  }
+  
+  public void Move(int x, int y){
 	System.out.println("Test");
   }
 }
@@ -104,6 +118,61 @@ class Rook extends ChessPiece{
   public void ValidMoves(int x, int y){
 	xCoord = x;
 	yCoord = y;
+	// Example plan for a Rook at (4,4)
+	// Max movement is 7 at any given direction
+	// E: (1,4); xCoord change: 4 - 1 (left max); Moves 3 left maximum
+	// W: (8,4); xCoord change: (8 - 1) (right max) - 3; Moves 4 right maximum
+	// N: (4,1); yCoord change: 4 - 1 (bottom max); Moves 3 down maximum
+	// S: (4,8); yCoord change: (8 - 1) (top max) - 3; Moves 4 up maximum
+	int leftBound = 1;
+	int rightBound = 7;
+	int lowerBound = 1;
+	int upperBound = 7;
+	int leftMax = x - leftBound;
+	int rightMax = rightBound - x;
+	int lowerMax = y - lowerBound;
+	int upperMax = upperBound - y;
+  }
+  
+  public void Move(int x, int y){
+	String directionMoved = JOptionPane.showInputDialog("Select direction to move: ");
+	String amountInput = JOptionPane.showInputDialog("Select amount to move (1-7): ");
+	int amountMoved = Integer.parseInt(amountInput);
+	
+	int leftBound = 1;
+	int rightBound = 7;
+	int lowerBound = 1;
+	int upperBound = 7;
+	int leftMax = x - leftBound;
+	int rightMax = rightBound - x;
+	int lowerMax = y - lowerBound;
+	int upperMax = upperBound - y;
+	
+	JOptionPane.showMessageDialog(null, "Old x Coord: " + xCoord + " | Old y Coord: " + yCoord);
+	
+	switch(directionMoved){
+		case "N":
+			if(amountMoved <= upperMax){
+			  yCoord += amountMoved;
+			}
+			break;
+		case "S":
+			if(amountMoved <= lowerMax){
+			  yCoord -= amountMoved;
+			}
+			break;
+		case "E":
+			if(amountMoved <= rightMax){
+			  xCoord += amountMoved;
+			}
+			break;
+		case "W":
+			if(amountMoved <= leftMax){
+			  xCoord -= amountMoved;
+			}
+			break;
+	}
+	JOptionPane.showMessageDialog(null, "New x Coord: " + xCoord + " | New y Coord: " + yCoord);
   }
 }
 
@@ -119,6 +188,10 @@ class Bishop extends ChessPiece{
   }
   
   public void ValidMoves(int x, int y){
+	System.out.println("Test");
+  }
+  
+  public void Move(int x, int y){
 	System.out.println("Test");
   }
 }
@@ -137,6 +210,10 @@ class Knight extends ChessPiece{
   public void ValidMoves(int x, int y){
 	System.out.println("Test");
   }
+  
+  public void Move(int x, int y){
+	System.out.println("Test");
+  }
 }
 
 class Pawn extends ChessPiece{
@@ -153,6 +230,10 @@ class Pawn extends ChessPiece{
   public void ValidMoves(int x, int y){
 	System.out.println("Test");
   }
+  
+  public void Move(int x, int y){
+	System.out.println("Test");
+  }
 }
 
 class NullPiece extends ChessPiece{
@@ -167,6 +248,10 @@ class NullPiece extends ChessPiece{
   }
   
   public void ValidMoves(int x, int y){
+	System.out.println("Test");
+  }
+  
+  public void Move(int x, int y){
 	System.out.println("Test");
   }
 }

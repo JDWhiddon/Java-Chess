@@ -8,27 +8,30 @@ public class ChessFrame extends JFrame {
   Color cream = new Color(238, 238, 210);
   Color green = new Color(118, 150, 86);
   
-  // Probably use a different data structure but arrays for now
-  // (maybe an ArrayList if sticking to arrays)
-  // Container for the in play chess pieces
+  /* -- Container for the in play chess pieces --
+    // Probably use a different data structure but arrays for now
+    // (maybe an ArrayList if sticking to arrays)*/
   private ChessPiece[] ChessPieceContainer = new ChessPiece[32];
-  // Will be used depending on the setup
-  // 32 for DefaultGameSetup
-  // 6 = TestGameSetup 
+  /* -- Will be used depending on the setup --
+    // 32 for DefaultGameSetup
+    // 6 = TestGameSetup */
   private static int numPieces;
   // < Insert captured pieces on white container here >
   // < Insert captured pieces on black container here >
   
-  // ChessPiece Copy
-  // selectedPiece is temporary, copiedPiece for multiple uses
+  /* -- ChessPiece Copy --
+    // selectedPiece is temporary, copiedPiece for multiple uses*/
   private static ChessPiece copiedPiece = new NullPiece(1,1, 'N');
-  // Selected Indicator
-  // Determines whether a move should be taken
+  /* -- Selected Indicator --
+    // Determines whether a move should be taken */
   private static boolean isSelected = false;
-  // Extracted coords from ChessPiece object
+  /* Extracted coords from ChessPiece object */
   private static int xCoord;
   private static int yCoord;
+  /* For any scanner input */
   Scanner userInput = new Scanner(System.in);
+  /* For the board */
+  private static JPanel[][] playSquare = new JPanel[8][8];
 
   public ChessFrame() {
     super("Chess by John and Harold");
@@ -43,7 +46,6 @@ public class ChessFrame extends JFrame {
   public void CreateBoard() {
     // Creates the grid, starting with a white square at the top left
 	// Each individual square can be modified
-	JPanel[][] playSquare = new JPanel[8][8];
 	
 	// Reworked the board loops to support a 2D array
 	for (int i = 0; i < 8; i++) {
@@ -63,18 +65,17 @@ public class ChessFrame extends JFrame {
 	}
 	
 	// Sets up the board
-	//DefaultGameSetup(playSquare);
-	TestGameSetup(playSquare);
-	
-
+	//DefaultGameSetup();
+	TestGameSetup();
   }
   
   // Initialize pieces on the board
-  private void DefaultGameSetup(JPanel[][] boardCopy){
+  private void DefaultGameSetup(){
 	numPieces = 32;
-	// Probably use a data structure from Collections but arrays for now
-	// Each piece may need to have their coordinates compared with a set of selected
-	// coordinates (and maybe symbol) to find the right piece when moving a piece
+	/* ---- Filling the ChessPieceContainer with pieces ----
+	  // Probably use a data structure from Collections but arrays for now
+	  // Each piece may need to have their coordinates compared with a set of selected
+	  // coordinates (and maybe symbol) to find the right piece when moving a piece */
 	// ---- White ---- //
 	ChessPieceContainer[0] = new King(5,1, 'W');
 	ChessPieceContainer[1] = new Queen(4,1, 'W');
@@ -85,7 +86,7 @@ public class ChessFrame extends JFrame {
 	ChessPieceContainer[6] = new Rook(1,1, 'W');
 	ChessPieceContainer[7] = new Rook(8,1, 'W');
 	for(int i = 0; i < 8; i++){
-	  //Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
+	  //  Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
 	  ChessPieceContainer[i + 8] = new Pawn((i + 1), 2, 'W');
 	}
 	
@@ -99,21 +100,27 @@ public class ChessFrame extends JFrame {
 	ChessPieceContainer[22] = new Rook(1,8, 'B');
 	ChessPieceContainer[23] = new Rook(8,8, 'B');
 	for(int i = 0; i < 8; i++){
-	  //Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
+	  //  Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
 	  ChessPieceContainer[i + 24] = new Pawn((i + 1), 7, 'B');
 	}
-	
-	// A PlacePiece function may be added in place, an ArrayList may also be used instead of an array
+	/* -- Initializes the display on the board --
+	   A PlacePiece function may be added in place
+	   An ArrayList may also be used instead of an array */
 	for(int i = 0; i < numPieces; i++){
+	  /* EX for below method: 
+	      (1,1) gets taken in and is translated to be [7][0] in the array 
+		  where [7] is the i index (yCoord) and [0] is the j index (xCoord)*/
 	  TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
-	  boardCopy[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+	  // The JPanel adds a new JLabel that represents a piece at the selected coordinates
+	  playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+	  // Experimental, may be unused
 	  ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
 	}
   }
   
   // Initialize specific pieces for testing purposes
-  private void TestGameSetup(JPanel[][] boardCopy){
-	// Needs to be modified per amount of content in the ChessPieceContainer
+  private void TestGameSetup(){
+	// ** Needs to be modified per amount of content in the ChessPieceContainer **
 	numPieces = 1;
 	
 	ChessPieceContainer[0] = new Rook(4,4, 'W');
@@ -131,9 +138,16 @@ public class ChessFrame extends JFrame {
 	// A PlacePiece function may be added in place, an ArrayList may also be used instead of an array
 	for(int i = 0; i < numPieces; i++){
 	  TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
-	  boardCopy[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+	  playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+	  // Experimental, may be unused
 	  ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
 	}
+  }
+  
+  // Used for testing methods
+  public void ChessMethodTester(){
+    manualSelectCoords();
+	MovePiece(copiedPiece);
   }
   
   // (1,1) is the bottom left, (8,8) is the top left on the white side perspective
@@ -149,10 +163,9 @@ public class ChessFrame extends JFrame {
   
   // Designed to be as compatible for different types of selection 
   public void selectPiece(int x, int y){
+	// A copiedPiece needs to be passed through several methods without being needed as a parameter
 	copiedPiece = new NullPiece(1,1, 'N');
 	TranslateCoordinates(x, y);
-	// To extract the specific index for the chosen container, may be unused later
-	// int index;
 	for(int i = 0; i < numPieces; i++){
 	  if(x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()){
 		// From java.lang.Class<T>, using .getClass().getName()
@@ -163,19 +176,46 @@ public class ChessFrame extends JFrame {
 		ShowValidMoves(copiedPiece);
 	  }
 	}
-	//ChessPieceContainer[index];
   }
   
+  // Displays the valid moves on the board
   public void ShowValidMoves(ChessPiece selectedPiece){
+	// Work in progress
 	int pivotxCoord = copiedPiece.GetXCoord();
 	int pivotyCoord = copiedPiece.GetYCoord();
 	copiedPiece.ValidMoves(pivotxCoord, pivotyCoord);
-	// Example plan for a Rook at (4,4)
-	// Max movement is 7 at any given direction
-	// E: (1,4); xCoord change: 4 - 1 (left max); Moves 3 left maximum
-	// W: (8,4); xCoord change: (8 - 1) (right max) - 3; Moves 4 right maximum
-	// N: (4,1); yCoord change: 4 - 1 (bottom max); Moves 3 down maximum
-	// S: (4,8); yCoord change: (8 - 1) (top max) - 3; Moves 4 up maximum
+
+  }
+  
+  public void MovePiece(ChessPiece selectedPiece){
+	selectedPiece.Move(selectedPiece.GetXCoord(), selectedPiece.GetYCoord());
+	UpdatePieces();
+  }
+  
+  // Needed to update the board after a piece is moved
+  public void UpdatePieces(){
+	// Reset all current JPanels
+	for(int i = 0; i < 8; i++){
+	  for(int j = 0; j < 8; j++){
+	    playSquare[i][j].removeAll();
+		playSquare[i][j].repaint();	
+	  }  
+	}  
+	  
+	// May add an if statement to detect if a piece is captured or not to not draw it on the board
+    for(int i = 0; i < numPieces; i++){
+	  TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
+	  playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+	  // Experimental, may be unused
+	  ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
+	} 
+
+	// Update any changes
+	for(int i = 0; i < 8; i++){
+	  for(int j = 0; j < 8; j++){
+	    playSquare[i][j].validate();
+	  }  
+	} 
   }
   
   // Assuming the orientation is not flipped for now
