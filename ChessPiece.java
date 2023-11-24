@@ -161,7 +161,59 @@ class Queen extends ChessPiece {
 		  }
 	    }
 	  }
-    } 
+	  
+    }
+	// ---- Black ----
+	else{
+	  // Going -> Top
+	  for(int i = 1; i <= upperMax; i++){
+        coordinatesList.add(new int[] { x, y + i});
+	  }
+	  // Going -> Bottom
+	  for(int i = 1; i <= lowerMax; i++){
+        coordinatesList.add(new int[] { x, y - i});
+	  }
+	  // Going -> Right
+	  for(int i = 1; i <= rightMax; i++){
+        coordinatesList.add(new int[] { x + i, y });
+	  }
+	  // Going -> Left
+	  for(int i = 1; i <= leftMax; i++){
+        coordinatesList.add(new int[] { x - i, y });
+	  }
+	  // Going -> Top Right
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Right
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y - i });
+		  }
+	    }
+	  }
+	  // Going -> Top Left
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Left
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y - i });
+		  }
+	    }
+	  }
+	}
     return coordinatesList;
   }
 
@@ -215,6 +267,25 @@ class Rook extends ChessPiece {
         coordinatesList.add(new int[] { x - i, y });
 	  }
     } 
+	// ---- Black ----
+	else{
+	  // Going -> Top
+	  for(int i = 1; i <= upperMax; i++){
+        coordinatesList.add(new int[] { x, y + i});
+	  }
+	  // Going -> Bottom
+      for(int i = 1; i <= lowerMax; i++){
+        coordinatesList.add(new int[] { x, y - i});
+	  }
+	  // Going -> Right
+	  for(int i = 1; i <= rightMax; i++){
+        coordinatesList.add(new int[] { x + i, y });
+      }
+	  // Going -> Left
+	  for(int i = 1; i <= leftMax; i++){
+        coordinatesList.add(new int[] { x - i, y });
+	  }
+	}
     return coordinatesList;
   }
 
@@ -336,7 +407,42 @@ class Bishop extends ChessPiece {
 		  }
 	    }
 	  }
-    } 
+    }
+	// ---- Black ----
+	else{
+	  // Going -> Top Right
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Right
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y - i });
+		  }
+	    }
+	  }
+	  // Going -> Top Left
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Left
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y - i });
+		  }
+	    }
+	  }
+	}
     return coordinatesList;
   }
 
@@ -372,21 +478,13 @@ class Knight extends ChessPiece {
     int upperMax = upperBound - y;
 	
     if (playerSide == 'W') {
-	  // Going -> 2 Top + 1 Direction
-	  for(int i = 1; i <= upperMax; i++){
-        coordinatesList.add(new int[] { x, y + i});
+	  // Going -> 2 Top + Right
+	  if(y <= upperMax && x <= rightMax){
+        coordinatesList.add(new int[] { x + 1, y});
 	  }
-	  // Going -> 2 Right + 1 Direction
-	  for(int i = 1; i <= lowerMax; i++){
-        coordinatesList.add(new int[] { x, y - i});
-	  }
-	  // Going -> 2 Bottom + 1 Direction
-	  for(int i = 1; i <= rightMax; i++){
-        coordinatesList.add(new int[] { x + i, y });
-	  }
-	 // Going -> 2 Left + 1 Direction
-	  for(int i = 1; i <= leftMax; i++){
-        coordinatesList.add(new int[] { x - i, y });
+	  // Going -> 2 Top + Left
+	  if(y <= upperMax && x >= leftMax){
+        coordinatesList.add(new int[] { x - 1, y});
 	  }
     } 
     return coordinatesList;
