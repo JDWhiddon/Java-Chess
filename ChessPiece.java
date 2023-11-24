@@ -31,8 +31,6 @@ public abstract class ChessPiece {
     return coordinatesList;
   }
 
-  public abstract void ValidMoves(int x, int y);
-
   public abstract void Move(int x, int y);
 
   public int GetXCoord() {
@@ -88,10 +86,6 @@ class King extends ChessPiece {
 
   public char GetSymbol() {
     return symbol;
-  }
-
-  public void ValidMoves(int x, int y) {
-    System.out.println("Test");
   }
 
   public void Move(int x, int y) {
@@ -226,10 +220,6 @@ class Queen extends ChessPiece {
     return coordinatesList;
   }
 
-  public void ValidMoves(int x, int y) {
-    System.out.println("Test");
-  }
-
   public void Move(int x, int y) {
     System.out.println("Test");
   }
@@ -296,27 +286,6 @@ class Rook extends ChessPiece {
 	  }
 	}
     return coordinatesList;
-  }
-
-  // Reads in the current xCoord and yCoord and calculates the maximum distance
-  // per move
-  public void ValidMoves(int x, int y) {
-    /* xCoord = x;
-       yCoord = y;
-       Example plan for a Rook at (4,4)
-       Max movement is 7 at any given direction
-       E: (1,4); xCoord change: 4 - 1 (left max); Moves 3 left maximum
-       W: (8,4); xCoord change: (8 - 1) (right max) - 3; Moves 4 right maximum
-       N: (4,1); yCoord change: 4 - 1 (bottom max); Moves 3 down maximum
-       S: (4,8); yCoord change: (8 - 1) (top max) - 3; Moves 4 up maximum
-       int leftBound = 1;
-       int rightBound = 7;
-       int lowerBound = 1;
-       int upperBound = 7;
-       int leftMax = x - leftBound;
-       int rightMax = rightBound - x;
-       int lowerMax = y - lowerBound;
-       int upperMax = upperBound - y; */
   }
 
   public void Move(int x, int y) {
@@ -455,10 +424,6 @@ class Bishop extends ChessPiece {
     return coordinatesList;
   }
 
-  public void ValidMoves(int x, int y) {
-    System.out.println("Test");
-  }
-
   public void Move(int x, int y) {
     System.out.println("Test");
   }
@@ -481,26 +446,77 @@ class Knight extends ChessPiece {
     int rightBound = 8;
     int lowerBound = 1;
     int upperBound = 8;
-    int leftMax = x - leftBound;
-    int rightMax = rightBound - x;
-    int lowerMax = y - lowerBound;
-    int upperMax = upperBound - y;
 	
     if (playerSide == 'W') {
 	  // Going -> 2 Top + Right
-	  if(y <= upperMax && x <= rightMax){
-        coordinatesList.add(new int[] { x + 1, y});
+	  if(((y + 2) <= upperBound) && ((x + 1) <= rightBound)){
+        coordinatesList.add(new int[] { x + 1, y + 2});
 	  }
 	  // Going -> 2 Top + Left
-	  if(y <= upperMax && x >= leftMax){
-        coordinatesList.add(new int[] { x - 1, y});
+	  if(((y + 2) <= upperBound) && ((x - 1) >= leftBound)){
+        coordinatesList.add(new int[] { x - 1, y + 2});
+	  }
+	  // Going -> 2 Bottom + Right
+	  if(((y - 2) >= lowerBound) && ((x + 1) <= rightBound)){
+        coordinatesList.add(new int[] { x + 1, y - 2});
+	  }
+	  // Going -> 2 Bottom + Left
+	  if(((y - 2) >= lowerBound) && ((x - 1) >= leftBound)){
+        coordinatesList.add(new int[] { x - 1, y - 2});
+	  }
+	  // Going -> 2 Right + Top
+	  if(((x + 2) <= rightBound) && ((y + 1) <= upperBound)){
+        coordinatesList.add(new int[] { x + 2, y + 1});
+	  }
+	  // Going -> 2 Right + Bottom
+	  if(((x + 2) <= rightBound) && ((y - 1) >= lowerBound)){
+        coordinatesList.add(new int[] { x + 2, y - 1});
+	  }
+	  // Going -> 2 Left + Top
+	  if(((x - 2) >= leftBound) && ((y + 1) <= upperBound)){
+        coordinatesList.add(new int[] { x - 2, y + 1});
+	  }
+	  // Going -> 2 Left + Bottom
+	  if(((x - 2) >= leftBound) && ((y - 1) >= lowerBound)){
+        coordinatesList.add(new int[] { x - 2, y - 1});
+	  }
+    } 
+	// ---- Black ----
+	else{
+	  // Going -> 2 Top + Right
+	  if(((y + 2) <= upperBound) && ((x + 1) <= rightBound)){
+        coordinatesList.add(new int[] { x + 1, y + 2});
+	  }
+	  // Going -> 2 Top + Left
+	  if(((y + 2) <= upperBound) && ((x - 1) >= leftBound)){
+        coordinatesList.add(new int[] { x - 1, y + 2});
+	  }
+	  // Going -> 2 Bottom + Right
+	  if(((y - 2) >= lowerBound) && ((x + 1) <= rightBound)){
+        coordinatesList.add(new int[] { x + 1, y - 2});
+	  }
+	  // Going -> 2 Bottom + Left
+	  if(((y - 2) >= lowerBound) && ((x - 1) >= leftBound)){
+        coordinatesList.add(new int[] { x - 1, y - 2});
+	  }
+	  // Going -> 2 Right + Top
+	  if(((x + 2) <= rightBound) && ((y + 1) <= upperBound)){
+        coordinatesList.add(new int[] { x + 2, y + 1});
+	  }
+	  // Going -> 2 Right + Bottom
+	  if(((x + 2) <= rightBound) && ((y - 1) >= lowerBound)){
+        coordinatesList.add(new int[] { x + 2, y - 1});
+	  }
+	  // Going -> 2 Left + Top
+	  if(((x - 2) >= leftBound) && ((y + 1) <= upperBound)){
+        coordinatesList.add(new int[] { x - 2, y + 1});
+	  }
+	  // Going -> 2 Left + Bottom
+	  if(((x - 2) >= leftBound) && ((y - 1) >= lowerBound)){
+        coordinatesList.add(new int[] { x - 2, y - 1});
 	  }
     } 
     return coordinatesList;
-  }
-
-  public void ValidMoves(int x, int y) {
-    System.out.println("Test");
   }
 
   public void Move(int x, int y) {
@@ -531,10 +547,6 @@ class Pawn extends ChessPiece {
     return coordinatesList;
   }
 
-  public void ValidMoves(int x, int y) {
-    System.out.println("Test");
-  }
-
   public void Move(int x, int y) {
     System.out.println("Test");
   }
@@ -549,10 +561,6 @@ class NullPiece extends ChessPiece {
 
   public char GetSymbol() {
     return symbol;
-  }
-
-  public void ValidMoves(int x, int y) {
-    System.out.println("Test");
   }
 
   public void Move(int x, int y) {
