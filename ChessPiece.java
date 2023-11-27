@@ -11,6 +11,7 @@ public abstract class ChessPiece {
   protected char symbol = ' ';
   protected char playerSide = ' ';
   protected boolean isAlive = true;
+  protected boolean isSelected = false;
   // May mess with the JLabels in each specific JPanel later
   protected JLabel jlabelCopy;
 
@@ -66,6 +67,14 @@ public abstract class ChessPiece {
   public void SetJLabel(JLabel label) {
     jlabelCopy = label;
   }
+  
+  public void SelectPiece() {
+    isSelected = true;
+  }
+  
+  public void DeselectPiece() {
+    isSelected = false;
+  }
 
   public void RemovePiece() {
     isAlive = false;
@@ -73,6 +82,10 @@ public abstract class ChessPiece {
 
   public boolean IsAlive() {
     return isAlive;
+  }
+  
+  public boolean IsSelected() {
+    return isSelected;
   }
 }
 
@@ -86,6 +99,51 @@ class King extends ChessPiece {
 
   public char GetSymbol() {
     return symbol;
+  }
+  
+  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	int leftBound = 1;
+    int rightBound = 8;
+    int lowerBound = 1;
+    int upperBound = 8;
+	
+    if (playerSide == 'W') {
+	  // Going -> Top
+	  if(y < upperBound)
+        coordinatesList.add(new int[] { x, y + 1});
+	  // Going -> Bottom
+	  if(y > lowerBound)
+        coordinatesList.add(new int[] { x, y - 1});
+	  // Going -> Right
+	  if(x < rightBound)
+        coordinatesList.add(new int[] { x + 1, y });
+	  // Going -> Left
+	  if(x > leftBound)
+        coordinatesList.add(new int[] { x - 1, y });
+	  // Going -> Top Right
+	  if(y < upperBound && x < rightBound){
+		coordinatesList.add(new int[] { x + 1, y + 1 });
+	  }
+	  // Going -> Bottom Right
+	  if(y > lowerBound && x < rightBound){
+		coordinatesList.add(new int[] { x + 1, y - 1 });
+	  }
+	  // Going -> Top Left
+	  if(y < upperBound && x > leftBound){
+		coordinatesList.add(new int[] { x - 1, y + 1 });
+	  }
+	  // Going -> Bottom Left
+	  if(y > lowerBound && x > leftBound){
+        coordinatesList.add(new int[] { x - 1, y - 1 });
+	  }
+	  
+    }
+	// ---- Black ----
+	else{
+	  
+	}
+    return coordinatesList;
   }
 
   public void Move(int x, int y) {
