@@ -92,6 +92,8 @@ public abstract class ChessPiece {
 // Derived classes temporarily here for now
 class King extends ChessPiece {
   private char symbol = 'K';
+  private boolean canCastle = true;
+  private boolean hasMoved = false;
 
   public King(int x, int y, char ps) {
     super(x, y, ps);
@@ -141,7 +143,34 @@ class King extends ChessPiece {
     }
 	// ---- Black ----
 	else{
-	  
+	  // Going -> Top
+	  if(y < upperBound)
+        coordinatesList.add(new int[] { x, y + 1});
+	  // Going -> Bottom
+	  if(y > lowerBound)
+        coordinatesList.add(new int[] { x, y - 1});
+	  // Going -> Right
+	  if(x < rightBound)
+        coordinatesList.add(new int[] { x + 1, y });
+	  // Going -> Left
+	  if(x > leftBound)
+        coordinatesList.add(new int[] { x - 1, y });
+	  // Going -> Top Right
+	  if(y < upperBound && x < rightBound){
+		coordinatesList.add(new int[] { x + 1, y + 1 });
+	  }
+	  // Going -> Bottom Right
+	  if(y > lowerBound && x < rightBound){
+		coordinatesList.add(new int[] { x + 1, y - 1 });
+	  }
+	  // Going -> Top Left
+	  if(y < upperBound && x > leftBound){
+		coordinatesList.add(new int[] { x - 1, y + 1 });
+	  }
+	  // Going -> Bottom Left
+	  if(y > lowerBound && x > leftBound){
+        coordinatesList.add(new int[] { x - 1, y - 1 });
+	  }
 	}
     return coordinatesList;
   }
@@ -584,6 +613,11 @@ class Knight extends ChessPiece {
 
 class Pawn extends ChessPiece {
   private char symbol = 'P';
+  private boolean canCapture = false;
+  int leftBound = 1;
+  int rightBound = 8;
+  int lowerBound = 1;
+  int upperBound = 8;
 
   public Pawn(int x, int y, char ps) {
     super(x, y, ps);
@@ -596,11 +630,22 @@ class Pawn extends ChessPiece {
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
     if (playerSide == 'W') {
-      coordinatesList.add(new int[] { x, y + 1 });
-      coordinatesList.add(new int[] { x, y + 2 });
+	  // At start position
+	  if(y < upperBound){
+		if(y == 2){
+		  coordinatesList.add(new int[] { x, y + 2 });
+		  coordinatesList.add(new int[] { x, y + 1 });
+	    } else
+		  coordinatesList.add(new int[] { x, y + 1 });
+	  }
     } else {
-      coordinatesList.add(new int[] { x, y - 1 });
-      coordinatesList.add(new int[] { x, y - 2 });
+	  if(y > lowerBound){
+		if(y == 7){
+          coordinatesList.add(new int[] { x, y - 2 });
+	      coordinatesList.add(new int[] { x, y - 1 });
+	    } else
+          coordinatesList.add(new int[] { x, y - 1 });
+	  }
     }
     return coordinatesList;
   }
@@ -608,6 +653,7 @@ class Pawn extends ChessPiece {
   public void Move(int x, int y) {
     System.out.println("Test");
   }
+  
 }
 
 class NullPiece extends ChessPiece {
