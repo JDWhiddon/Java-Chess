@@ -230,23 +230,34 @@ public class ChessFrame extends JFrame {
   }
 
   public void MakeMove(int x, int y, int newX, int newY) {
-    for (int i = 0; i < 32; i++) {
+    
+	boolean canMove = MoveValidator(newX, newY);
+	
+	if(canMove == true){
+      copiedPiece.SetYCoord(newY);
+      copiedPiece.SetXCoord(newX);
+	}
+	
+	UpdatePieces();
+  }
+  
+  public boolean MoveValidator(int newX, int newY){
+	boolean canMove = true;
+	for (int i = 0; i < 32; i++) {
       // Checks to see if the piece moved on top of another, and removes it if so
-      if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY) {
-        ChessPieceContainer[i].RemovePiece();
-        System.out.println("Piece taken!");
+      if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY && ChessPieceContainer[i].IsAlive()) {
+	    if(ChessPieceContainer[i].GetPlayerSide() != copiedPiece.GetPlayerSide()){
+          ChessPieceContainer[i].RemovePiece();
+          System.out.println("Piece taken!");
+		}
+		else{
+		  canMove = false;
+		}
       }
     }
-    copiedPiece.SetYCoord(newY);
-    copiedPiece.SetXCoord(newX);
-    UpdatePieces();
+	
+	return canMove;
   }
-
-  // public void MovePiece(ChessPiece selectedPiece) {
-  // selectedPiece.Move(selectedPiece.GetXCoord(), selectedPiece.GetYCoord());
-
-  // UpdatePieces();
-  // }
 
   // Needed to update the board after a piece is moved
   public void UpdatePieces() {
