@@ -12,6 +12,7 @@ public abstract class ChessPiece {
   protected char playerSide = ' ';
   protected boolean isAlive = true;
   protected boolean isSelected = false;
+  protected int turn;
   // May mess with the JLabels in each specific JPanel later
   protected JLabel jlabelCopy;
 
@@ -31,8 +32,6 @@ public abstract class ChessPiece {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
     return coordinatesList;
   }
-
-  public abstract void Move(int x, int y);
 
   public int GetXCoord() {
     return xCoord;
@@ -87,6 +86,15 @@ public abstract class ChessPiece {
   public boolean IsSelected() {
     return isSelected;
   }
+  
+  // Pawns only
+  public boolean IsMovedTwice() {
+	boolean isPawn = false;
+	return isPawn;
+  }
+  /*
+  public void MoveTwice(boolean x) {
+  }*/
 }
 
 // Derived classes temporarily here for now
@@ -182,21 +190,100 @@ class King extends ChessPiece {
 
 class Queen extends ChessPiece {
   private char symbol = 'Q';
+  int leftBound = 1;
+  int rightBound = 8;
+  int lowerBound = 1;
+  int upperBound = 8;
 
   public Queen(int x, int y, char ps) {
     super(x, y, ps);
+  }
+  
+  public void ResetBounds(){
+	leftBound = 1;
+    rightBound = 8;
+    lowerBound = 1;
+    upperBound = 8;
   }
 
   public char GetSymbol() {
     return symbol;
   }
   
+  public void DetectCollision(JPanel[][] playSquares, int x, int y, ChessPiece cp){
+	int leftMax = x - 1;
+    int rightMax = 8 - x;
+    int lowerMax = y - 1;
+    int upperMax = 8 - y;
+	
+	if(playerSide == 'W' && cp.IsAlive()){
+	   // Going -> Top
+	  for(int i = 1; i <= upperMax; i++){
+		if(cp.GetXCoord() == x && cp.GetYCoord() == y + i){
+		  upperBound = i;
+		  i = 8;
+		}
+	  }
+	  // Going -> Bottom
+	  for(int i = 1; i <= lowerMax; i++){
+        if(cp.GetXCoord() == x && cp.GetYCoord() == y - i){
+		  lowerBound = i;
+		  i = 8;
+		}
+	  }
+	  // Going -> Right
+	  for(int i = 1; i <= rightMax; i++){
+        if(cp.GetXCoord() == x + i && cp.GetYCoord() == y){
+		  rightBound = i;
+		  i = 8;
+		}
+	  }
+	  // Going -> Left
+	  for(int i = 1; i <= leftMax; i++){
+        if(cp.GetXCoord() == x - i && cp.GetYCoord() == y){
+		  leftBound = i;
+		  i = 8;
+		}
+	  }
+	  // Going -> Top Right
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            
+		  }
+	    }
+	  }
+	  // Going -> Bottom Right
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= rightMax; j++){
+		  if(j == i){
+            
+		  }
+	    }
+	  }
+	  // Going -> Top Left
+	  for(int i = 1; i <= upperMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            
+		  }
+	    }
+	  }
+	  // Going -> Bottom Left
+	  for(int i = 1; i <= lowerMax; i++){
+		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+            
+		  }
+	    }
+	  }
+	} else {
+		
+	  }
+  }
+  
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
-	int leftBound = 1;
-    int rightBound = 8;
-    int lowerBound = 1;
-    int upperBound = 8;
     int leftMax = x - leftBound;
     int rightMax = rightBound - x;
     int lowerMax = y - lowerBound;
@@ -304,6 +391,8 @@ class Queen extends ChessPiece {
 	    }
 	  }
 	}
+	
+	ResetBounds();
     return coordinatesList;
   }
 
@@ -314,7 +403,14 @@ class Queen extends ChessPiece {
 
 class Rook extends ChessPiece {
   private char symbol = 'R';
-  private int maxMovement = 7;
+  int leftBound = 1;
+  int rightBound = 8;
+  int lowerBound = 1;
+  int upperBound = 8;
+  int limitedLeftBound = 0;
+  int limitedRightBound = 0;
+  int limitedLowerBound = 0;
+  int limitedUpperBound = 0;
 
   public Rook(int x, int y, char ps) {
     super(x, y, ps);
@@ -324,16 +420,59 @@ class Rook extends ChessPiece {
     return symbol;
   }
   
+  public void ResetBounds(){
+	limitedLeftBound = 0;
+	limitedRightBound = 0;
+	limitedLowerBound = 0;
+	limitedUpperBound = 0;
+  }
+  
+  public void DetectCollision(JPanel[][] playSquares, int x, int y, ChessPiece cp){
+	int leftMax = x - 1;
+    int rightMax = 8 - x;
+    int lowerMax = y - 1;
+    int upperMax = 8 - y;
+	
+	if(playerSide == 'W' && cp.IsAlive()){
+	   // Going -> Top
+	  for(int i = 1; i <= upperMax; i++){
+		if(cp.GetXCoord() == x && cp.GetYCoord() == y + i){
+		  limitedUpperBound = i;
+		  break;
+		}
+	  }
+	  // Going -> Bottom
+	  for(int i = 1; i <= lowerMax; i++){
+        if(cp.GetXCoord() == x && cp.GetYCoord() == y - i){
+		  limitedLowerBound = i;
+		  break;
+		}
+	  }
+	  // Going -> Right
+	  for(int i = 1; i <= rightMax; i++){
+        if(cp.GetXCoord() == x + i && cp.GetYCoord() == y){
+		  limitedRightBound = i;
+		  break;
+		}
+	  }
+	  // Going -> Left
+	  for(int i = 1; i <= leftMax; i++){
+        if(cp.GetXCoord() == x - i && cp.GetYCoord() == y){
+		  limitedLeftBound = i;
+		  break;
+		}
+	  }
+	} else {
+		
+	  }
+  }
+  
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
-	int leftBound = 1;
-    int rightBound = 8;
-    int lowerBound = 1;
-    int upperBound = 8;
-    int leftMax = x - leftBound;
-    int rightMax = rightBound - x;
-    int lowerMax = y - lowerBound;
-    int upperMax = upperBound - y;
+    int leftMax = (x - leftBound) - limitedLeftBound;
+    int rightMax = (rightBound - x) - limitedRightBound;
+    int lowerMax = (y - lowerBound) - limitedLowerBound;
+    int upperMax = (upperBound - y) - limitedUpperBound;
 	
     if (playerSide == 'W') {
 	  // Going -> Top
@@ -372,6 +511,8 @@ class Rook extends ChessPiece {
         coordinatesList.add(new int[] { x - i, y });
 	  }
 	}
+	
+	ResetBounds();
     return coordinatesList;
   }
 
@@ -613,7 +754,9 @@ class Knight extends ChessPiece {
 
 class Pawn extends ChessPiece {
   private char symbol = 'P';
-  private boolean canCapture = false;
+  private boolean isBlocked = false;
+  private boolean movedTwice = false;
+  boolean[] choices = new boolean[5];
   int leftBound = 1;
   int rightBound = 8;
   int lowerBound = 1;
@@ -621,17 +764,113 @@ class Pawn extends ChessPiece {
 
   public Pawn(int x, int y, char ps) {
     super(x, y, ps);
+	ResetChoices();
   }
 
   public char GetSymbol() {
     return symbol;
   }
+  
+  public void DetectSpecialMove(JPanel[][] playSquares, int x, int y, ChessPiece cp){
+	if(playerSide == 'W' && cp.IsAlive()){
+		// Front movement (Blocked)
+	    if (cp.GetXCoord() == x && cp.GetYCoord() == (y + 1)) {
+		  choices[0] = true;
+		  isBlocked = true;
+        }
+	    // Diagonal right capture
+        if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y + 1)) {
+		  choices[1] = true;
+        }
+	    // Diagonal left capture
+	    if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y + 1)) {
+		  choices[2] = true;
+        }
+		// En Passant right
+		if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		  choices[3] = true;
+		}
+		//En Passant left
+		if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		  choices[4] = true;
+        }
+		// ---- Black Side ----
+	  } else {
+		// Front movement (Blocked)
+	    if (cp.GetXCoord() == x && cp.GetYCoord() == (y - 1)) {
+		  choices[0] = true;
+		  isBlocked = true;
+        }
+		// Diagonal right capture
+        if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y - 1)) {
+		  choices[1] = true;
+        }
+	    // Diagonal left capture
+	    if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y - 1)) {
+		  choices[2] = true;
+        }
+		// En Passant right
+		if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		  choices[3] = true;
+		}
+		//En Passant left
+		if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		  choices[4] = true;
+	    }
+	  }
+	  
+  }
+
+  public ArrayList<int[]> PawnSpecialMove(JPanel[][] playSquares, int x, int y) {
+	  
+	ArrayList<int[]> SelectedCoordinatesList = ValidMoves(playSquares, x, y);
+    if (playerSide == 'W') {
+	  // Diagonal Right Capture
+	  if(choices[1] == true && y < upperBound && x < rightBound){
+		SelectedCoordinatesList.add(new int[] { x + 1, y + 1 });
+	  }
+	  // Diagonal Left Capture
+	  if(choices[2] == true && y < upperBound && x > leftBound){
+		SelectedCoordinatesList.add(new int[] { x - 1, y + 1 });
+	  }
+	  // En Passant Right
+	  if(choices[3] == true && y < upperBound && x < rightBound){
+		SelectedCoordinatesList.add(new int[] { x + 1, y + 1 });
+	  }
+	  // En Passant Left
+	  if(choices[4] == true && y < upperBound && x > leftBound){
+		SelectedCoordinatesList.add(new int[] { x - 1, y + 1 });
+	  }
+    } else {
+	  // Diagonal Right Capture
+	  if(choices[1] == true && y > lowerBound && x < rightBound){
+		SelectedCoordinatesList.add(new int[] { x + 1, y - 1 });
+	  }
+	  // Diagonal Left Capture
+	  if(choices[2] == true && y > lowerBound && x > leftBound){
+		SelectedCoordinatesList.add(new int[] { x - 1, y - 1 });
+	  }
+	  // En Passant Right
+	  if(choices[3] == true && y > lowerBound && x < rightBound){
+		SelectedCoordinatesList.add(new int[] { x + 1, y - 1 });
+	  }
+	  // En Passant Left
+	  if(choices[4] == true && y > lowerBound && x > leftBound){
+		SelectedCoordinatesList.add(new int[] { x - 1, y - 1 });
+	  }
+	}
+	
+	ResetChoices();
+	
+    return SelectedCoordinatesList;
+  }
 
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	movedTwice = false;
+	ArrayList<int[]> coordinatesList = new ArrayList<>();
     if (playerSide == 'W') {
 	  // At start position
-	  if(y < upperBound){
+	  if(y < upperBound && isBlocked == false){
 		if(y == 2){
 		  coordinatesList.add(new int[] { x, y + 2 });
 		  coordinatesList.add(new int[] { x, y + 1 });
@@ -639,7 +878,7 @@ class Pawn extends ChessPiece {
 		  coordinatesList.add(new int[] { x, y + 1 });
 	  }
     } else {
-	  if(y > lowerBound){
+	  if(y > lowerBound && isBlocked == false){
 		if(y == 7){
           coordinatesList.add(new int[] { x, y - 2 });
 	      coordinatesList.add(new int[] { x, y - 1 });
@@ -649,9 +888,20 @@ class Pawn extends ChessPiece {
     }
     return coordinatesList;
   }
+  
+  public void ResetChoices(){
+	for(int i = 0; i < 5; i++){
+	  choices[i] = false;
+	}
+	isBlocked = false;
+  }
 
-  public void Move(int x, int y) {
-    System.out.println("Test");
+  public boolean IsMovedTwice() {
+	return movedTwice;
+  }
+  
+  public void MoveTwice(boolean x) {
+    movedTwice = x;
   }
   
 }

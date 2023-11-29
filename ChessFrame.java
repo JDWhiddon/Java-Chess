@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ChessFrame extends JFrame {
-
+  // -------- Variables -------- //
+  
   private GridLayout chessBoard;
   Color cream = new Color(238, 238, 210);
   Color green = new Color(118, 150, 86);
+  Color validMoveColor = new Color(255, 255, 0);
 
   /*
    * -- Container for the in play chess pieces --
@@ -25,7 +27,7 @@ public class ChessFrame extends JFrame {
    * // 32 for DefaultGameSetup
    * // 6 = TestGameSetup
    */
-  private static int numPieces;
+  private int numPieces;
   // < Insert captured pieces on white container here >
   // < Insert captured pieces on black container here >
 
@@ -33,22 +35,27 @@ public class ChessFrame extends JFrame {
    * -- ChessPiece Copy --
    * // selectedPiece is temporary, copiedPiece for multiple uses
    */
-  private static ChessPiece copiedPiece = new NullPiece(1, 1, 'N');
+  private ChessPiece copiedPiece = new NullPiece(1, 1, 'N');
   /*
    * -- Selected Indicator --
    * // Determines whether a move should be taken
    */
-  private static boolean isSelected = false;
+  private boolean isSelected = false;
   /* Extracted coords from ChessPiece object */
-  private static int xCoord;
-  private static int yCoord;
+  private int xCoord;
+  private int yCoord;
   /* Valid moves from the selected piece */
   ArrayList<int[]> SelectedCoordinatesList;
 
   /* For any scanner input */
   Scanner userInput = new Scanner(System.in);
   /* For the board */
-  private static JPanel[][] playSquare = new JPanel[8][8];
+  private JPanel[][] playSquare = new JPanel[8][8];
+  
+  // Turn Counter 
+  private int turnCount = 1;
+  
+  // -------- Methods -------- //
 
   public ChessFrame() {
     super("Chess by John and Harold");
@@ -78,9 +85,9 @@ public class ChessFrame extends JFrame {
       }
     }
 
+	// Sets up the board
     DefaultGameSetup();
-    // Sets up the board
-    // TestGameSetup();
+    //TestGameSetup();
   }
 
   // To reset the JPanel Backgrounds
@@ -102,10 +109,9 @@ public class ChessFrame extends JFrame {
     numPieces = 32;
     /*
      * ---- Filling the ChessPieceContainer with pieces ----
-     * // Probably use a data structure from Collections but arrays for now
-     * // Each piece may need to have their coordinates compared with a set of
-     * selected
-     * // coordinates (and maybe symbol) to find the right piece when moving a piece
+     * Probably use a data structure from Collections but arrays for now
+     * Each piece may need to have their coordinates compared with a set of selected
+     * coordinates (and maybe symbol) to find the right piece when moving a piece
      */
     // ---- White ---- //
     ChessPieceContainer[0] = new King(5, 1, 'W');
@@ -157,42 +163,38 @@ public class ChessFrame extends JFrame {
   // Initialize specific pieces for testing purposes
   private void TestGameSetup() {
     // ** Needs to be modified per amount of content in the ChessPieceContainer **
-    numPieces = 1;
+    numPieces = 22;
 
-    ChessPieceContainer[0] = new Rook(4, 4, 'W');
+    // ---- White ---- //
+    ChessPieceContainer[0] = new King(5, 1, 'W');
+    ChessPieceContainer[1] = new Rook(1, 1, 'W');
+    ChessPieceContainer[2] = new Rook(8, 1, 'W');
+    for (int i = 0; i < 8; i++) {
+      // Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
+      ChessPieceContainer[i + 3] = new Pawn((i + 1), 2, 'W');
+    }
 
-    /*
-     * // ---- White ---- //
-     * ChessPieceContainer[0] = new King(5,1, 'W');
-     * ChessPieceContainer[1] = new Rook(1,1, 'W');
-     * ChessPieceContainer[2] = new Rook(8,1, 'W');
-     * 
-     * // ---- Black ---- //
-     * ChessPieceContainer[3] = new King(5,8, 'B');
-     * ChessPieceContainer[4] = new Rook(1,8, 'B');
-     * ChessPieceContainer[5] = new Rook(8,8, 'B');
-     */
+	
+    // ---- Black ---- //
+    ChessPieceContainer[11] = new King(5, 8, 'B');
+    ChessPieceContainer[12] = new Rook(1, 8, 'B');
+    ChessPieceContainer[13] = new Rook(8, 8, 'B');
+    for (int i = 0; i < 8; i++) {
+      // Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
+      ChessPieceContainer[i + 14] = new Pawn((i + 1), 7, 'B');
+    }
 
     // A PlacePiece function may be added in place, an ArrayList may also be used
     // instead of an array
     for (int i = 0; i < numPieces; i++) {
       TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
       playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
-      // Experimental, may be unused
-      ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
     }
   }
 
-  // Used for testing methods
-  // public void ChessMethodTester() {
-  // MovePiece(copiedPiece);
-  // }
-
-  // (1,1) is the bottom left, (8,8) is the top left on the white side perspective
-  // Text input only
-
   // Designed to be as compatible for different types of selection
   // selectPiece always generates a new copied piece based on the recent selection
+  // Triggered by clicks 
   public void selectPiece(int x, int y) {
     // A copiedPiece needs to be passed through several methods without being needed
     // as a parameter
@@ -212,26 +214,88 @@ public class ChessFrame extends JFrame {
   }
 
   // Displays the valid moves on the board
+  // Triggered by clicks 
   public void ShowValidMoves(ChessPiece selectedPiece) {
-    // Work in progress
     int pivotxCoord = copiedPiece.GetXCoord();
     int pivotyCoord = copiedPiece.GetYCoord();
+	boolean overrideValidMove = false;
     ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(playSquare, pivotxCoord, pivotyCoord);
 
     // Resets the background of each square, so that the moves reset when
     // deselecting a piece
     ResetBoardBackground();
-
-    Color validMoveColor = new Color(255, 255, 0);
-    for (int[] coordinates : coordinatesList) {
+	
+	// ---- Piece Selection ---- //
+	// From java.lang.Class<T>, using .getClass().getName()
+	if(copiedPiece.getClass().getName() == "Pawn"){
+	  coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
+	  System.out.println("Pawn ");
+	} else if (copiedPiece.getClass().getName() == "Rook"){
+	  coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
+	  System.out.println("Rook ");
+	} else if (copiedPiece.getClass().getName() == "Queen"){
+	  coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
+	  System.out.println("Queen ");
+	} else if (copiedPiece.getClass().getName() == "King"){
+	  System.out.println("King ");
+	}
+	
+	SelectedCoordinatesList = coordinatesList;
+	
+	for (int[] coordinates : coordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
-
   }
-
+  
+  // -------- Valid Move Helper Functions -------- //
+  // Shows valid pawn movement based on the position of other pieces
+  // May integrate into the pawn class if possible
+  public ArrayList<int[]> ModifyPawnMovement(int x, int y){
+	// To access pawn only methods
+	Pawn copiedPawn = (Pawn)copiedPiece;
+	ArrayList<int[]> coordinatesList = new ArrayList<>();
+	
+	for (int i = 0; i < numPieces; i++) {
+	  copiedPawn.DetectSpecialMove(playSquare, x, y, ChessPieceContainer[i]);
+    }
+	
+	coordinatesList = copiedPawn.PawnSpecialMove(playSquare, x, y);
+	
+	return coordinatesList;
+  }
+  
+  public ArrayList<int[]> ModifyRookMovement(int x, int y){
+	// To access Rook only methods
+	Rook copiedRook = (Rook)copiedPiece;
+	ArrayList<int[]> coordinatesList = new ArrayList<>();
+	
+	for (int i = 0; i < numPieces; i++) {
+	  copiedRook.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+    }
+	
+	coordinatesList = copiedRook.ValidMoves(playSquare, x, y);
+	
+	return coordinatesList;
+  }
+  
+  public ArrayList<int[]> ModifyQueenMovement(int x, int y){
+	// To access Queen only methods
+	Queen copiedQueen = (Queen)copiedPiece;
+	ArrayList<int[]> coordinatesList = new ArrayList<>();
+	
+	for (int i = 0; i < numPieces; i++) {
+	  copiedQueen.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+    }
+	
+	coordinatesList = copiedQueen.ValidMoves(playSquare, x, y);
+	
+	return coordinatesList;
+  }
+  
+  // ------------ Move Functions ------------ //
   public void MakeMove(int x, int y, int newX, int newY) {
     
-	boolean canMove = MoveValidator(newX, newY);
+	boolean canMove = MoveValidator(x, y, newX, newY);
 	
 	if(canMove == true){
       copiedPiece.SetYCoord(newY);
@@ -241,9 +305,11 @@ public class ChessFrame extends JFrame {
 	UpdatePieces();
   }
   
-  public boolean MoveValidator(int newX, int newY){
+  // -------- Move Helper Functions -------- //
+  // Determines an action for a move
+  private boolean MoveValidator(int x, int y, int newX, int newY){
 	boolean canMove = true;
-	for (int i = 0; i < 32; i++) {
+	for (int i = 0; i < numPieces; i++) {
       // Checks to see if the piece moved on top of another, and removes it if so
       if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY && ChessPieceContainer[i].IsAlive()) {
 	    if(ChessPieceContainer[i].GetPlayerSide() != copiedPiece.GetPlayerSide()){
@@ -254,9 +320,44 @@ public class ChessFrame extends JFrame {
 		  canMove = false;
 		}
       }
+	  
+	  // Special cases
+	  if (copiedPiece.getClass().getName() == "Pawn" ){
+	    //EnPassant(x, y, newX, newY);
+	  }
     }
 	
 	return canMove;
+  }
+  
+  public void EnPassant(int x, int y, int newX, int newY){
+	  
+	// To access pawn only methods
+	Pawn copiedPawn = (Pawn)copiedPiece;
+	
+	// If a pawn has moved twice
+	if((copiedPawn.GetYCoord() == 2 && newY == 4) || (copiedPawn.GetYCoord() == 7 && newY == 5)){
+	  copiedPawn.MoveTwice(true);
+	}
+	
+	for (int i = 0; i < numPieces; i++) {
+	  // En Passant Right
+	  if (ChessPieceContainer[i].GetXCoord() == (x + 1) && ChessPieceContainer[i].GetYCoord() == (y)
+	  && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice() == true) {
+		if(ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()){
+          ChessPieceContainer[i].RemovePiece();
+          System.out.println("Piece taken!");
+		}
+	  // En Passant left
+      } else if (ChessPieceContainer[i].GetXCoord() == (x - 1) && ChessPieceContainer[i].GetYCoord() == (y)
+      && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice() == true) { 
+		if(ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()){
+          ChessPieceContainer[i].RemovePiece();
+          System.out.println("Piece taken!");
+		}
+      }
+	}
+	
   }
 
   // Needed to update the board after a piece is moved
@@ -275,8 +376,6 @@ public class ChessFrame extends JFrame {
       if (ChessPieceContainer[i].IsAlive()) {
         TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
         playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
-        // Experimental, may be unused
-        ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
       }
     }
 
@@ -371,25 +470,31 @@ public class ChessFrame extends JFrame {
       if (isSelected == false) {
         for (int i = 0; i < 8; i++)
           for (int j = 0; j < 8; j++)
+			// ---- Select ----
             if (e.getSource() == playSquare[i][j]) {
               selectPiece(j + 1, 8 - i);
               isSelected = true;
-              SelectedCoordinatesList = copiedPiece.ValidMoves(playSquare, j + 1, 8 - i);
             }
+		// ---- Move/Deselect ---- //
+		// If the piece is already selected
+		// Uses a copied piece to represent a piece
       } else {
         isSelected = false;
         for (int i = 0; i < 8; i++)
           for (int j = 0; j < 8; j++)
             if (e.getSource() == playSquare[i][j]) {
-              for (int[] coordinates : SelectedCoordinatesList) {
-                if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
-                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i);
-                  ResetBoardBackground();
-                  UpdatePieces();
-                }
-              }
+			  for (int[] coordinates : SelectedCoordinatesList) {
+				if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
+				  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i);
+				  ResetBoardBackground();
+				  UpdatePieces();
+				  // ---- Deselect ----
+				} else if (j + 1 == copiedPiece.GetXCoord() && 8 - i == copiedPiece.GetYCoord()){
+				  ResetBoardBackground();
+				  UpdatePieces();
+				}
+			  }
             }
-
       }
     }
 
