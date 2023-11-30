@@ -403,14 +403,25 @@ class Queen extends ChessPiece {
 
 class Rook extends ChessPiece {
   private char symbol = 'R';
-  int leftBound = 1;
-  int rightBound = 8;
-  int lowerBound = 1;
-  int upperBound = 8;
-  int limitedLeftBound = 0;
-  int limitedRightBound = 0;
-  int limitedLowerBound = 0;
-  int limitedUpperBound = 0;
+  private boolean isBlockedUp = false;
+  private boolean isBlockedDown = false;
+  private boolean isBlockedLeft = false;
+  private boolean isBlockedRight = false;
+  final int leftBound = 1;
+  final int rightBound = 9;
+  final int lowerBound = 1;
+  final int upperBound = 9;
+  // ---- Limits movement ---- //
+  // Lower bounds set to 0 to reach the end
+  private int limitedLeftBound = 0;
+  private int limitedRightBound = 9;
+  private int limitedLowerBound = 0;
+  private int limitedUpperBound = 9;
+  
+  private int previousLeftBound = 0;
+  private int previousRightBound = 9;
+  private int previousLowerBound = 0;
+  private int previousUpperBound = 9;
 
   public Rook(int x, int y, char ps) {
     super(x, y, ps);
@@ -422,78 +433,193 @@ class Rook extends ChessPiece {
   
   public void ResetBounds(){
 	limitedLeftBound = 0;
-	limitedRightBound = 0;
+	limitedRightBound = 9;
 	limitedLowerBound = 0;
-	limitedUpperBound = 0;
+	limitedUpperBound = 9;
+	isBlockedUp = false;
+	isBlockedDown = false;
+	isBlockedLeft = false;
+	isBlockedRight = false;
+	previousLeftBound = 0;
+	previousRightBound = 9;
+	previousLowerBound = 0;
+	previousUpperBound = 9;
   }
   
   public void DetectCollision(JPanel[][] playSquares, int x, int y, ChessPiece cp){
-	int leftMax = x - 1;
-    int rightMax = 8 - x;
-    int lowerMax = y - 1;
-    int upperMax = 8 - y;
+	int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
 	
-	if(playerSide == 'W' && cp.IsAlive()){
+	if(/*playerSide == 'W' &&*/ cp.IsAlive()){
 	   // Going -> Top
-	  for(int i = 1; i <= upperMax; i++){
+	  for(int i = 1; i < upperMax; i++){
 		if(cp.GetXCoord() == x && cp.GetYCoord() == y + i){
-		  limitedUpperBound = i;
-		  break;
+		  limitedUpperBound = y + i;
 		}
 	  }
 	  // Going -> Bottom
-	  for(int i = 1; i <= lowerMax; i++){
+	  for(int i = 1; i < lowerMax; i++){
         if(cp.GetXCoord() == x && cp.GetYCoord() == y - i){
-		  limitedLowerBound = i;
-		  break;
+		  limitedLowerBound = y - i;
 		}
 	  }
 	  // Going -> Right
-	  for(int i = 1; i <= rightMax; i++){
+	  for(int i = 1; i < rightMax; i++){
         if(cp.GetXCoord() == x + i && cp.GetYCoord() == y){
-		  limitedRightBound = i;
-		  break;
+		  limitedRightBound = x + i;
 		}
 	  }
 	  // Going -> Left
-	  for(int i = 1; i <= leftMax; i++){
+	  for(int i = 1; i < leftMax; i++){
         if(cp.GetXCoord() == x - i && cp.GetYCoord() == y){
-		  limitedLeftBound = i;
-		  break;
+		  limitedLeftBound = x - i;
 		}
 	  }
-	} else {
-		
+	} /*else if (playerSide == 'B' && cp.IsAlive()) {
+		// Going -> Top
+	  for(int i = 1; i < upperMax; i++){
+		if(cp.GetXCoord() == x && cp.GetYCoord() == y + i){
+		  limitedUpperBound = y + i;
+		}
 	  }
+	  // Going -> Bottom
+	  for(int i = 1; i < lowerMax; i++){
+        if(cp.GetXCoord() == x && cp.GetYCoord() == y - i){
+		  limitedLowerBound = y - i;
+		}
+	  }
+	  // Going -> Right
+	  for(int i = 1; i < rightMax; i++){
+        if(cp.GetXCoord() == x + i && cp.GetYCoord() == y){
+		  limitedRightBound = x + i;
+		}
+	  }
+	  // Going -> Left
+	  for(int i = 1; i < leftMax; i++){
+        if(cp.GetXCoord() == x - i && cp.GetYCoord() == y){
+		  limitedLeftBound = x - i;
+		}
+	  }
+	} */
+	 
+	DetectCapture(x, y, cp);
+	CompareBounds(x, y);
+	  
+	previousUpperBound = limitedUpperBound;
+	previousLowerBound = limitedLowerBound;
+	previousRightBound = limitedRightBound;
+	previousLeftBound = limitedLeftBound;
+	
+  }
+  
+  // To detect the closest piece to the selected piece to combat
+  // array loop limitations.
+  public void CompareBounds(int x, int y){
+	if(playerSide == 'W' || playerSide == 'B'){
+	  if(previousUpperBound < limitedUpperBound){
+		limitedUpperBound = previousUpperBound;
+	  }
+	  if(previousLowerBound > limitedLowerBound){
+		limitedLowerBound = previousLowerBound;
+	  }
+	  if(previousRightBound < limitedRightBound){
+		limitedRightBound = previousRightBound;
+	  }
+	  if(previousLeftBound > limitedLeftBound){
+		limitedLeftBound = previousLeftBound;
+	  }
+	}/*else if (playerSide == 'B'){
+	  if(previousUpperBound < limitedUpperBound){
+		limitedUpperBound = previousUpperBound;
+	  }
+	  if(previousLowerBound > limitedLowerBound){
+		limitedLowerBound = previousLowerBound;
+	  }
+	  if(previousRightBound < limitedRightBound){
+		limitedRightBound = previousRightBound;
+	  }
+	  if(previousLeftBound > limitedLeftBound){
+		limitedLeftBound = previousLeftBound;
+	  }
+	}*/
+  }
+  
+  public void DetectCapture(int x, int y, ChessPiece cp){
+	int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
+	
+	if(playerSide == 'W' && cp.IsAlive() && cp.GetPlayerSide() == 'B'){
+	   // Going -> Top
+	  if(cp.GetXCoord() == x && cp.GetYCoord() == limitedUpperBound){
+		limitedUpperBound = limitedUpperBound + 1;
+	  }
+	  // Going -> Bottom
+	  if(cp.GetXCoord() == x && cp.GetYCoord() == limitedLowerBound){
+	    limitedLowerBound = limitedLowerBound - 1;
+	  }
+	  // Going -> Right
+      if(cp.GetXCoord() == limitedRightBound && cp.GetYCoord() == y){
+		limitedRightBound = limitedRightBound + 1;
+	  }
+	  // Going -> Left
+	  if(cp.GetXCoord() == limitedLeftBound && cp.GetYCoord() == y){
+	    limitedLeftBound = limitedLeftBound - 1;
+	  } 
+	} else if(playerSide == 'B' && cp.IsAlive() && cp.GetPlayerSide() == 'W'){
+	  // Going -> Top
+	  if(cp.GetXCoord() == x && cp.GetYCoord() == limitedUpperBound){
+		limitedUpperBound = limitedUpperBound + 1;
+	  }
+	  // Going -> Bottom
+	  if(cp.GetXCoord() == x && cp.GetYCoord() == limitedLowerBound){
+	    limitedLowerBound = limitedLowerBound - 1;
+	  }
+	  // Going -> Right
+      if(cp.GetXCoord() == limitedRightBound && cp.GetYCoord() == y){
+		limitedRightBound = limitedRightBound + 1;
+	  }
+	  // Going -> Left
+	  if(cp.GetXCoord() == limitedLeftBound && cp.GetYCoord() == y){
+	    limitedLeftBound = limitedLeftBound - 1;
+	  }
+	}
   }
   
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
-    int leftMax = (x - leftBound) - limitedLeftBound;
-    int rightMax = (rightBound - x) - limitedRightBound;
-    int lowerMax = (y - lowerBound) - limitedLowerBound;
-    int upperMax = (upperBound - y) - limitedUpperBound;
+	// x value - 1
+    int leftMax = x - limitedLeftBound;
+	// 8 - x value
+    int rightMax = limitedRightBound - x;
+	// y value - 1
+    int lowerMax = y - limitedLowerBound;
+	// 8 - y value
+    int upperMax = limitedUpperBound - y;
 	
-    if (playerSide == 'W') {
+    if (playerSide == 'W' || playerSide == 'B') {
 	  // Going -> Top
-	  for(int i = 1; i <= upperMax; i++){
+	  for(int i = 1; i < upperMax; i++){
         coordinatesList.add(new int[] { x, y + i});
 	  }
 	  // Going -> Bottom
-	  for(int i = 1; i <= lowerMax; i++){
+	  for(int i = 1; i < lowerMax; i++){
         coordinatesList.add(new int[] { x, y - i});
 	  }
 	  // Going -> Right
-	  for(int i = 1; i <= rightMax; i++){
+	  for(int i = 1; i < rightMax; i++){
         coordinatesList.add(new int[] { x + i, y });
 	  }
 	  // Going -> Left
-	  for(int i = 1; i <= leftMax; i++){
+	  for(int i = 1; i < leftMax; i++){
         coordinatesList.add(new int[] { x - i, y });
 	  }
     } 
-	// ---- Black ----
-	else{
+	// ---- Player 2 ----
+	/*else{
 	  // Going -> Top
 	  for(int i = 1; i <= upperMax; i++){
         coordinatesList.add(new int[] { x, y + i});
@@ -510,51 +636,14 @@ class Rook extends ChessPiece {
 	  for(int i = 1; i <= leftMax; i++){
         coordinatesList.add(new int[] { x - i, y });
 	  }
-	}
+	}*/
 	
 	ResetBounds();
     return coordinatesList;
   }
 
   public void Move(int x, int y) {
-    String directionMoved = JOptionPane.showInputDialog("Select direction to move: ");
-    String amountInput = JOptionPane.showInputDialog("Select amount to move (1-7): ");
-    int amountMoved = Integer.parseInt(amountInput);
-
-    int leftBound = 1;
-    int rightBound = 7;
-    int lowerBound = 1;
-    int upperBound = 7;
-    int leftMax = x - leftBound;
-    int rightMax = rightBound - x;
-    int lowerMax = y - lowerBound;
-    int upperMax = upperBound - y;
-
-    JOptionPane.showMessageDialog(null, "Old x Coord: " + xCoord + " | Old y Coord: " + yCoord);
-
-    switch (directionMoved) {
-      case "N":
-        if (amountMoved <= upperMax) {
-          yCoord += amountMoved;
-        }
-        break;
-      case "S":
-        if (amountMoved <= lowerMax) {
-          yCoord -= amountMoved;
-        }
-        break;
-      case "E":
-        if (amountMoved <= rightMax) {
-          xCoord += amountMoved;
-        }
-        break;
-      case "W":
-        if (amountMoved <= leftMax) {
-          xCoord -= amountMoved;
-        }
-        break;
-    }
-    JOptionPane.showMessageDialog(null, "New x Coord: " + xCoord + " | New y Coord: " + yCoord);
+    
   }
 }
 
