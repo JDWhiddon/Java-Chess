@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class ChessFrame extends JFrame {
   // -------- Variables -------- //
-  
+
   private GridLayout chessBoard;
   Color cream = new Color(238, 238, 210);
   Color green = new Color(118, 150, 86);
@@ -51,10 +51,10 @@ public class ChessFrame extends JFrame {
   Scanner userInput = new Scanner(System.in);
   /* For the board */
   private JPanel[][] playSquare = new JPanel[8][8];
-  
-  // Turn Counter 
+
+  // Turn Counter
   private int turnCount = 1;
-  
+
   // -------- Methods -------- //
 
   public ChessFrame() {
@@ -85,9 +85,9 @@ public class ChessFrame extends JFrame {
       }
     }
 
-	// Sets up the board
+    // Sets up the board
     DefaultGameSetup();
-    //TestGameSetup();
+    // TestGameSetup();
   }
 
   // To reset the JPanel Backgrounds
@@ -174,7 +174,6 @@ public class ChessFrame extends JFrame {
       ChessPieceContainer[i + 3] = new Pawn((i + 1), 2, 'W');
     }
 
-	
     // ---- Black ---- //
     ChessPieceContainer[11] = new King(5, 8, 'B');
     ChessPieceContainer[12] = new Rook(1, 8, 'B');
@@ -194,14 +193,15 @@ public class ChessFrame extends JFrame {
 
   // Designed to be as compatible for different types of selection
   // selectPiece always generates a new copied piece based on the recent selection
-  // Triggered by clicks 
+  // Triggered by clicks
   public void selectPiece(int x, int y) {
     // A copiedPiece needs to be passed through several methods without being needed
     // as a parameter
     copiedPiece = new NullPiece(1, 1, 'N');
     TranslateCoordinates(x, y);
     for (int i = 0; i < numPieces; i++) {
-      if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord() && ChessPieceContainer[i].IsAlive()) {
+      if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()
+          && ChessPieceContainer[i].IsAlive()) {
         // From java.lang.Class<T>, using .getClass().getName()
         // JOptionPane.showMessageDialog(null, "Selected Piece: " +
         // ChessPieceContainer[i].getClass().getName());
@@ -214,150 +214,208 @@ public class ChessFrame extends JFrame {
   }
 
   // Displays the valid moves on the board
-  // Triggered by clicks 
+  // Triggered by clicks
   public void ShowValidMoves(ChessPiece selectedPiece) {
     int pivotxCoord = copiedPiece.GetXCoord();
     int pivotyCoord = copiedPiece.GetYCoord();
-	boolean overrideValidMove = false;
+    boolean overrideValidMove = false;
     ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(playSquare, pivotxCoord, pivotyCoord);
 
     // Resets the background of each square, so that the moves reset when
     // deselecting a piece
     ResetBoardBackground();
-	
-	// ---- Piece Selection ---- //
-	// From java.lang.Class<T>, using .getClass().getName()
-	if(copiedPiece.getClass().getName() == "Pawn"){
-	  coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
-	  System.out.println("Pawn ");
-	} else if (copiedPiece.getClass().getName() == "Rook"){
-	  coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
-	  System.out.println("Rook ");
-	} else if (copiedPiece.getClass().getName() == "Queen"){
-	  coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
-	  System.out.println("Queen ");
-	} else if (copiedPiece.getClass().getName() == "King"){
-	  System.out.println("King ");
-	}
-	
-	SelectedCoordinatesList = coordinatesList;
-	
-	for (int[] coordinates : coordinatesList) {
+
+    // ---- Piece Selection ---- //
+    // From java.lang.Class<T>, using .getClass().getName()
+    if (copiedPiece.getClass().getName() == "Pawn") {
+      coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
+      System.out.println("Pawn ");
+    } else if (copiedPiece.getClass().getName() == "Rook") {
+      coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
+      System.out.println("Rook ");
+    } else if (copiedPiece.getClass().getName() == "Queen") {
+      coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
+      System.out.println("Queen ");
+    } else if (copiedPiece.getClass().getName() == "King") {
+      System.out.println("King ");
+    }
+
+    SelectedCoordinatesList = coordinatesList;
+
+    for (int[] coordinates : coordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
   }
-  
+
   // -------- Valid Move Helper Functions -------- //
   // Shows valid pawn movement based on the position of other pieces
   // May integrate into the pawn class if possible
-  public ArrayList<int[]> ModifyPawnMovement(int x, int y){
-	// To access pawn only methods
-	Pawn copiedPawn = (Pawn)copiedPiece;
-	ArrayList<int[]> coordinatesList = new ArrayList<>();
-	
-	for (int i = 0; i < numPieces; i++) {
-	  copiedPawn.DetectSpecialMove(playSquare, x, y, ChessPieceContainer[i]);
+  public ArrayList<int[]> ModifyPawnMovement(int x, int y) {
+    // To access pawn only methods
+    Pawn copiedPawn = (Pawn) copiedPiece;
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+
+    for (int i = 0; i < numPieces; i++) {
+      copiedPawn.DetectSpecialMove(playSquare, x, y, ChessPieceContainer[i]);
     }
-	
-	coordinatesList = copiedPawn.PawnSpecialMove(playSquare, x, y);
-	
-	return coordinatesList;
+
+    coordinatesList = copiedPawn.PawnSpecialMove(playSquare, x, y);
+
+    return coordinatesList;
   }
-  
-  public ArrayList<int[]> ModifyRookMovement(int x, int y){
-	// To access Rook only methods
-	Rook copiedRook = (Rook)copiedPiece;
-	ArrayList<int[]> coordinatesList = new ArrayList<>();
-	
-	for (int i = 0; i < numPieces; i++) {
-	  copiedRook.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+
+  public ArrayList<int[]> ModifyRookMovement(int x, int y) {
+    // To access Rook only methods
+    Rook copiedRook = (Rook) copiedPiece;
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+
+    for (int i = 0; i < numPieces; i++) {
+      copiedRook.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
     }
-	
-	coordinatesList = copiedRook.ValidMoves(playSquare, x, y);
-	
-	return coordinatesList;
+
+    coordinatesList = copiedRook.ValidMoves(playSquare, x, y);
+
+    return coordinatesList;
   }
-  
-  public ArrayList<int[]> ModifyQueenMovement(int x, int y){
-	// To access Queen only methods
-	Queen copiedQueen = (Queen)copiedPiece;
-	ArrayList<int[]> coordinatesList = new ArrayList<>();
-	
-	for (int i = 0; i < numPieces; i++) {
-	  copiedQueen.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+
+  public ArrayList<int[]> ModifyQueenMovement(int x, int y) {
+    // To access Queen only methods
+    Queen copiedQueen = (Queen) copiedPiece;
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+
+    for (int i = 0; i < numPieces; i++) {
+      copiedQueen.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
     }
-	
-	coordinatesList = copiedQueen.ValidMoves(playSquare, x, y);
-	
-	return coordinatesList;
+
+    coordinatesList = copiedQueen.ValidMoves(playSquare, x, y);
+
+    return coordinatesList;
   }
-  
+
   // ------------ Move Functions ------------ //
   public void MakeMove(int x, int y, int newX, int newY) {
-    
-	boolean canMove = MoveValidator(x, y, newX, newY);
-	
-	if(canMove == true){
+
+    boolean canMove = MoveValidator(x, y, newX, newY);
+
+    if (canMove == true) {
       copiedPiece.SetYCoord(newY);
       copiedPiece.SetXCoord(newX);
-	}
-	
-	UpdatePieces();
+    }
+    UpdatePieces();
   }
-  
+
   // -------- Move Helper Functions -------- //
   // Determines an action for a move
-  private boolean MoveValidator(int x, int y, int newX, int newY){
-	boolean canMove = true;
-	for (int i = 0; i < numPieces; i++) {
+  private boolean MoveValidator(int x, int y, int newX, int newY) {
+    boolean canMove = true;
+    for (int i = 0; i < numPieces; i++) {
       // Checks to see if the piece moved on top of another, and removes it if so
-      if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY && ChessPieceContainer[i].IsAlive()) {
-	    if(ChessPieceContainer[i].GetPlayerSide() != copiedPiece.GetPlayerSide()){
+      if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY
+          && ChessPieceContainer[i].IsAlive()) {
+        if (ChessPieceContainer[i].GetPlayerSide() != copiedPiece.GetPlayerSide()) {
           ChessPieceContainer[i].RemovePiece();
           System.out.println("Piece taken!");
-		}
-		else{
-		  canMove = false;
-		}
+        } else {
+          canMove = false;
+        }
       }
-	  
-	  // Special cases
-	  if (copiedPiece.getClass().getName() == "Pawn" ){
-	    //EnPassant(x, y, newX, newY);
-	  }
     }
-	
-	return canMove;
+    if (copiedPiece.getClass().getName() == "Pawn") {
+      // Special cases
+      // EnPassant(x, y, newX, newY);
+      copiedPiece.SetYCoord(newY);
+      copiedPiece.SetXCoord(newX);
+      CheckForPromotion(newX, newY);
+    }
+    return canMove;
   }
-  
-  public void EnPassant(int x, int y, int newX, int newY){
-	  
-	// To access pawn only methods
-	Pawn copiedPawn = (Pawn)copiedPiece;
-	
-	// If a pawn has moved twice
-	if((copiedPawn.GetYCoord() == 2 && newY == 4) || (copiedPawn.GetYCoord() == 7 && newY == 5)){
-	  copiedPawn.MoveTwice(true);
-	}
-	
-	for (int i = 0; i < numPieces; i++) {
-	  // En Passant Right
-	  if (ChessPieceContainer[i].GetXCoord() == (x + 1) && ChessPieceContainer[i].GetYCoord() == (y)
-	  && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice() == true) {
-		if(ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()){
-          ChessPieceContainer[i].RemovePiece();
-          System.out.println("Piece taken!");
-		}
-	  // En Passant left
-      } else if (ChessPieceContainer[i].GetXCoord() == (x - 1) && ChessPieceContainer[i].GetYCoord() == (y)
-      && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice() == true) { 
-		if(ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()){
-          ChessPieceContainer[i].RemovePiece();
-          System.out.println("Piece taken!");
-		}
+
+  public void CheckForPromotion(int x, int y) {
+    // If a pawn is on the bottom row, show white promotion box
+    ImageIcon queen = new ImageIcon();
+    ImageIcon knight = new ImageIcon();
+    ImageIcon bishop = new ImageIcon();
+    ImageIcon rook = new ImageIcon();
+    if (y == 8) {
+      queen = new ImageIcon(ChessFrame.class.getResource("Resources/WQueen.png"));
+      knight = new ImageIcon(ChessFrame.class.getResource("Resources/WKnight.png"));
+      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/WBishop.png"));
+      rook = new ImageIcon(ChessFrame.class.getResource("Resources/WRook.png"));
+    }
+    // If a pawn in on the top row, show black promotion box
+    else if (y == 1) {
+      queen = new ImageIcon(ChessFrame.class.getResource("Resources/BQueen.png"));
+      knight = new ImageIcon(ChessFrame.class.getResource("Resources/BKnight.png"));
+      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/BBishop.png"));
+      rook = new ImageIcon(ChessFrame.class.getResource("Resources/BRook.png"));
+    }
+    if (y == 1 || y == 8) {
+      Object[] promotionOptions = { queen, knight, bishop, rook };
+      int n = JOptionPane.showOptionDialog(this, "You got promoted! Choose a piece to change your pawn to.",
+          "Pawn promotion", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE, null, promotionOptions, queen);
+      // If the user closes out of the window without picking, choose queen
+      if (n == -1)
+        n = 0;
+      int index = -1;
+      for (int i = 0; i < numPieces; i++) {
+        if (ChessPieceContainer[i].GetXCoord() == x && ChessPieceContainer[i].GetYCoord() == y
+            && ChessPieceContainer[i].IsAlive()) {
+          index = i;
+          break;
+        }
       }
-	}
-	
+      // Remove the old pawn
+      ChessPieceContainer[index].RemovePiece();
+      switch (n) {
+        // Queen
+        case 0:
+          ChessPieceContainer[index] = new Queen(x, y, copiedPiece.GetPlayerSide());
+          break;
+        case 1:
+          ChessPieceContainer[index] = new Knight(x, y, copiedPiece.GetPlayerSide());
+          break;
+        case 2:
+          ChessPieceContainer[index] = new Bishop(x, y, copiedPiece.GetPlayerSide());
+          break;
+        case 3:
+          ChessPieceContainer[index] = new Rook(x, y, copiedPiece.GetPlayerSide());
+          break;
+        default:
+          break;
+
+      }
+    }
+  }
+
+  public void EnPassant(int x, int y, int newX, int newY) {
+
+    // To access pawn only methods
+    Pawn copiedPawn = (Pawn) copiedPiece;
+
+    // If a pawn has moved twice
+    if ((copiedPawn.GetYCoord() == 2 && newY == 4) || (copiedPawn.GetYCoord() == 7 && newY == 5)) {
+      copiedPawn.MoveTwice(true);
+    }
+
+    for (int i = 0; i < numPieces; i++) {
+      // En Passant Right
+      if (ChessPieceContainer[i].GetXCoord() == (x + 1) && ChessPieceContainer[i].GetYCoord() == (y)
+          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice() == true) {
+        if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
+          ChessPieceContainer[i].RemovePiece();
+          System.out.println("Piece taken!");
+        }
+        // En Passant left
+      } else if (ChessPieceContainer[i].GetXCoord() == (x - 1) && ChessPieceContainer[i].GetYCoord() == (y)
+          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice() == true) {
+        if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
+          ChessPieceContainer[i].RemovePiece();
+          System.out.println("Piece taken!");
+        }
+      }
+    }
+
   }
 
   // Needed to update the board after a piece is moved
@@ -470,30 +528,30 @@ public class ChessFrame extends JFrame {
       if (isSelected == false) {
         for (int i = 0; i < 8; i++)
           for (int j = 0; j < 8; j++)
-			// ---- Select ----
+            // ---- Select ----
             if (e.getSource() == playSquare[i][j]) {
               selectPiece(j + 1, 8 - i);
               isSelected = true;
             }
-		// ---- Move/Deselect ---- //
-		// If the piece is already selected
-		// Uses a copied piece to represent a piece
+        // ---- Move/Deselect ---- //
+        // If the piece is already selected
+        // Uses a copied piece to represent a piece
       } else {
         isSelected = false;
         for (int i = 0; i < 8; i++)
           for (int j = 0; j < 8; j++)
             if (e.getSource() == playSquare[i][j]) {
-			  for (int[] coordinates : SelectedCoordinatesList) {
-				if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
-				  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i);
-				  ResetBoardBackground();
-				  UpdatePieces();
-				  // ---- Deselect ----
-				} else if (j + 1 == copiedPiece.GetXCoord() && 8 - i == copiedPiece.GetYCoord()){
-				  ResetBoardBackground();
-				  UpdatePieces();
-				}
-			  }
+              for (int[] coordinates : SelectedCoordinatesList) {
+                if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
+                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i);
+                  ResetBoardBackground();
+                  UpdatePieces();
+                  // ---- Deselect ----
+                } else if (j + 1 == copiedPiece.GetXCoord() && 8 - i == copiedPiece.GetYCoord()) {
+                  ResetBoardBackground();
+                  UpdatePieces();
+                }
+              }
             }
       }
     }
