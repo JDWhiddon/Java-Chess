@@ -227,18 +227,31 @@ public class ChessFrame extends JFrame {
 
     // ---- Piece Selection ---- //
     // From java.lang.Class<T>, using .getClass().getName()
-    if (copiedPiece.getClass().getName() == "Pawn") {
-      coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
-      System.out.println("Pawn ");
-    } else if (copiedPiece.getClass().getName() == "Rook") {
-      coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
-      System.out.println("Rook ");
-    } else if (copiedPiece.getClass().getName() == "Queen") {
-      coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
-      System.out.println("Queen ");
-    } else if (copiedPiece.getClass().getName() == "King") {
-      System.out.println("King ");
-    }
+    switch(copiedPiece.getClass().getName()){
+	  case "Pawn":
+	    coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
+	    System.out.println("Pawn ");
+	    break;
+	  case "Rook":
+	    coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
+	    System.out.println("Rook ");
+	    break;
+	  case "Bishop":
+	    coordinatesList = ModifyBishopMovement(pivotxCoord, pivotyCoord);
+	    System.out.println("Bishop ");
+	    break;
+	  case "Knight":
+	    coordinatesList = ModifyKnightMovement(pivotxCoord, pivotyCoord);
+	    System.out.println("Knight ");
+	    break;
+	  case "Queen":
+	    coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
+	    System.out.println("Queen ");
+	    break;
+	  case "King":
+	    System.out.println("King ");
+	    break;
+	}
 
     SelectedCoordinatesList = coordinatesList;
 
@@ -276,6 +289,34 @@ public class ChessFrame extends JFrame {
     coordinatesList = copiedRook.ValidMoves(playSquare, x, y);
 
     return coordinatesList;
+  }
+  
+   public ArrayList<int[]> ModifyBishopMovement(int x, int y){
+	// To access Bishop only methods
+	Bishop copiedBishop = (Bishop)copiedPiece;
+	ArrayList<int[]> coordinatesList = new ArrayList<>();
+	
+	for (int i = 0; i < numPieces; i++) {
+	  copiedBishop.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+    }
+	
+	coordinatesList = copiedBishop.ValidMoves(playSquare, x, y);
+	
+	return coordinatesList;
+  }
+  
+  public ArrayList<int[]> ModifyKnightMovement(int x, int y){
+	// To access Bishop only methods
+	Knight copiedKnight = (Knight)copiedPiece;
+	ArrayList<int[]> coordinatesList = new ArrayList<>();
+	
+	for (int i = 0; i < numPieces; i++) {
+	  copiedKnight.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+    }
+	
+	coordinatesList = copiedKnight.ValidMoves(playSquare, x, y);
+	
+	return coordinatesList;
   }
 
   public ArrayList<int[]> ModifyQueenMovement(int x, int y) {
