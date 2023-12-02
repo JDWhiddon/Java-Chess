@@ -190,20 +190,20 @@ class King extends ChessPiece {
 
 class Queen extends ChessPiece {
   private char symbol = 'Q';
-  int leftBound = 1;
-  int rightBound = 8;
-  int lowerBound = 1;
-  int upperBound = 8;
+  final int leftBound = 1;
+  final int rightBound = 8;
+  final int lowerBound = 1;
+  final int upperBound = 8;
 
   public Queen(int x, int y, char ps) {
     super(x, y, ps);
   }
   
   public void ResetBounds(){
-	leftBound = 1;
+	/*leftBound = 1;
     rightBound = 8;
     lowerBound = 1;
-    upperBound = 8;
+    upperBound = 8;*/
   }
 
   public char GetSymbol() {
@@ -211,75 +211,7 @@ class Queen extends ChessPiece {
   }
   
   public void DetectCollision(JPanel[][] playSquares, int x, int y, ChessPiece cp){
-	int leftMax = x - 1;
-    int rightMax = 8 - x;
-    int lowerMax = y - 1;
-    int upperMax = 8 - y;
 	
-	if(playerSide == 'W' && cp.IsAlive()){
-	   // Going -> Top
-	  for(int i = 1; i <= upperMax; i++){
-		if(cp.GetXCoord() == x && cp.GetYCoord() == y + i){
-		  upperBound = i;
-		  i = 8;
-		}
-	  }
-	  // Going -> Bottom
-	  for(int i = 1; i <= lowerMax; i++){
-        if(cp.GetXCoord() == x && cp.GetYCoord() == y - i){
-		  lowerBound = i;
-		  i = 8;
-		}
-	  }
-	  // Going -> Right
-	  for(int i = 1; i <= rightMax; i++){
-        if(cp.GetXCoord() == x + i && cp.GetYCoord() == y){
-		  rightBound = i;
-		  i = 8;
-		}
-	  }
-	  // Going -> Left
-	  for(int i = 1; i <= leftMax; i++){
-        if(cp.GetXCoord() == x - i && cp.GetYCoord() == y){
-		  leftBound = i;
-		  i = 8;
-		}
-	  }
-	  // Going -> Top Right
-	  for(int i = 1; i <= upperMax; i++){
-		for(int j = 1; j <= rightMax; j++){
-		  if(j == i){
-            
-		  }
-	    }
-	  }
-	  // Going -> Bottom Right
-	  for(int i = 1; i <= lowerMax; i++){
-		for(int j = 1; j <= rightMax; j++){
-		  if(j == i){
-            
-		  }
-	    }
-	  }
-	  // Going -> Top Left
-	  for(int i = 1; i <= upperMax; i++){
-		for(int j = 1; j <= leftMax; j++){
-		  if(j == i){
-            
-		  }
-	    }
-	  }
-	  // Going -> Bottom Left
-	  for(int i = 1; i <= lowerMax; i++){
-		for(int j = 1; j <= leftMax; j++){
-		  if(j == i){
-            
-		  }
-	    }
-	  }
-	} else {
-		
-	  }
   }
   
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
@@ -338,59 +270,7 @@ class Queen extends ChessPiece {
 		  }
 	    }
 	  }
-	  
     }
-	// ---- Black ----
-	else{
-	  // Going -> Top
-	  for(int i = 1; i <= upperMax; i++){
-        coordinatesList.add(new int[] { x, y + i});
-	  }
-	  // Going -> Bottom
-	  for(int i = 1; i <= lowerMax; i++){
-        coordinatesList.add(new int[] { x, y - i});
-	  }
-	  // Going -> Right
-	  for(int i = 1; i <= rightMax; i++){
-        coordinatesList.add(new int[] { x + i, y });
-	  }
-	  // Going -> Left
-	  for(int i = 1; i <= leftMax; i++){
-        coordinatesList.add(new int[] { x - i, y });
-	  }
-	  // Going -> Top Right
-	  for(int i = 1; i <= upperMax; i++){
-		for(int j = 1; j <= rightMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x + j, y + i });
-		  }
-	    }
-	  }
-	  // Going -> Bottom Right
-	  for(int i = 1; i <= lowerMax; i++){
-		for(int j = 1; j <= rightMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x + j, y - i });
-		  }
-	    }
-	  }
-	  // Going -> Top Left
-	  for(int i = 1; i <= upperMax; i++){
-		for(int j = 1; j <= leftMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x - j, y + i });
-		  }
-	    }
-	  }
-	  // Going -> Bottom Left
-	  for(int i = 1; i <= lowerMax; i++){
-		for(int j = 1; j <= leftMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x - j, y - i });
-		  }
-	    }
-	  }
-	}
 	
 	ResetBounds();
     return coordinatesList;
@@ -403,10 +283,6 @@ class Queen extends ChessPiece {
 
 class Rook extends ChessPiece {
   private char symbol = 'R';
-  private boolean isBlockedUp = false;
-  private boolean isBlockedDown = false;
-  private boolean isBlockedLeft = false;
-  private boolean isBlockedRight = false;
   final int leftBound = 1;
   final int rightBound = 9;
   final int lowerBound = 1;
@@ -436,10 +312,6 @@ class Rook extends ChessPiece {
 	limitedRightBound = 9;
 	limitedLowerBound = 0;
 	limitedUpperBound = 9;
-	isBlockedUp = false;
-	isBlockedDown = false;
-	isBlockedLeft = false;
-	isBlockedRight = false;
 	previousLeftBound = 0;
 	previousRightBound = 9;
 	previousLowerBound = 0;
@@ -649,32 +521,85 @@ class Rook extends ChessPiece {
 
 class Bishop extends ChessPiece {
   private char symbol = 'B';
-
+  final int leftBound = 1;
+  final int rightBound = 9;
+  final int lowerBound = 1;
+  final int upperBound = 9;
+  // Upper Right
+  private int[] UROffset = new int[2];
+  // Lower Right
+  private int[] LROffset = new int[2];
+  // Upper Left
+  private int[] ULOffset = new int[2];
+  // Lower Left
+  private int[] LLOffset = new int[2];
+  
+  // Upper Right
+  private int[] previousUROffset = new int[2];
+  // Lower Right
+  private int[] previousLROffset = new int[2];
+  // Upper Left
+  private int[] previousULOffset = new int[2];
+  // Lower Left
+  private int[] previousLLOffset = new int[2];
+  
   public Bishop(int x, int y, char ps) {
     super(x, y, ps);
+	ResetOffsets();
   }
 
   public char GetSymbol() {
     return symbol;
   }
-
-  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-	int leftBound = 1;
-    int rightBound = 8;
-    int lowerBound = 1;
-    int upperBound = 8;
+  
+  public void ResetOffsets(){
+	// [0] = upper/lower
+	// [1] = right/left
+	// Upper Right
+	UROffset[0] = 0;
+	UROffset[1] = 0;
+	// Lower Right
+	LROffset[0] = 0;
+	LROffset[1] = 0;
+	// Upper Left
+	ULOffset[0] = 0;
+	ULOffset[1] = 0;
+	// Lower Left
+	LLOffset[0] = 0;
+	LLOffset[1] = 0;
+  
+	// Upper Right
+	previousUROffset[0] = 0;
+	previousUROffset[1] = 0;
+	// Lower Right
+	previousLROffset[0] = 0;
+	previousLROffset[1] = 0;
+	// Upper Left
+	previousULOffset[0] = 0;
+	previousULOffset[1] = 0;
+	// Lower Left
+	previousLLOffset[0] = 0;
+	previousLLOffset[1] = 0;
+  }
+  
+  public void DetectCollision(JPanel[][] playSquares, int x, int y, ChessPiece cp){
     int leftMax = x - leftBound;
     int rightMax = rightBound - x;
     int lowerMax = y - lowerBound;
     int upperMax = upperBound - y;
 	
-    if (playerSide == 'W') {
+	// Calculate the difference between a blocking piece and the
+	// selected piece
+	if (cp.IsAlive()) {
 	  // Going -> Top Right
 	  for(int i = 1; i <= upperMax; i++){
 		for(int j = 1; j <= rightMax; j++){
 		  if(j == i){
-            coordinatesList.add(new int[] { x + j, y + i });
+			if(cp.GetXCoord() == x + j && cp.GetYCoord() == y + i){
+			  UROffset = coordDifference(x, y, cp.GetXCoord(), cp.GetYCoord());
+			  System.out.print("URxOffset: " + UROffset[1] + " | ");
+			  System.out.println("URyOffset: " + UROffset[0]);
+			}
 		  }
 	    }
 	  }
@@ -682,7 +607,11 @@ class Bishop extends ChessPiece {
 	  for(int i = 1; i <= lowerMax; i++){
 		for(int j = 1; j <= rightMax; j++){
 		  if(j == i){
-            coordinatesList.add(new int[] { x + j, y - i });
+			if(cp.GetXCoord() == x + j && cp.GetYCoord() == y - i){
+              LROffset = coordDifference(x, y, cp.GetXCoord(), cp.GetYCoord());
+			  System.out.print("LRxOffset: " + LROffset[1] + " | ");
+			  System.out.println("LRyOffset: " + LROffset[0]);
+			}
 		  }
 	    }
 	  }
@@ -690,13 +619,129 @@ class Bishop extends ChessPiece {
 	  for(int i = 1; i <= upperMax; i++){
 		for(int j = 1; j <= leftMax; j++){
 		  if(j == i){
-            coordinatesList.add(new int[] { x - j, y + i });
+			if(cp.GetXCoord() == x - j && cp.GetYCoord() == y + i){
+              ULOffset = coordDifference(x, y, cp.GetXCoord(), cp.GetYCoord());
+			  System.out.print("ULxOffset: " + ULOffset[1] + " | ");
+			  System.out.println("ULyOffset: " + ULOffset[0]);
+			}
 		  }
 	    }
 	  }
 	  // Going -> Bottom Left
 	  for(int i = 1; i <= lowerMax; i++){
 		for(int j = 1; j <= leftMax; j++){
+		  if(j == i){
+			if(cp.GetXCoord() == x - j && cp.GetYCoord() == y - i){
+              LLOffset = coordDifference(x, y, cp.GetXCoord(), cp.GetYCoord());
+			  System.out.print("LLxOffset: " + LLOffset[1] + " | ");
+			  System.out.println("LLyOffset: " + LLOffset[0]);
+			}
+		  }
+	    }
+	  }
+    }
+	
+	CompareOffsets(x, y);
+	
+	for(int i = 0; i < 2; i++){
+	  previousUROffset[i] = UROffset[i];
+	  previousLROffset[i] = LROffset[i];
+	  previousULOffset[i] = ULOffset[i];
+	  previousLLOffset[i] = LLOffset[i];
+	}
+  }
+  
+  public int[] coordDifference(int x, int y, int newx, int newy){
+	int[] offsetArr = new int[2];
+	if(newx > x){
+	  offsetArr[1] = newx - x;
+	} else if (newx < x){
+	  offsetArr[1] = x - newx;
+	}
+	
+	if(newy > y){
+	  offsetArr[0] = newy - y;
+	} else if (newy < y){
+	  offsetArr[0] = y - newy;
+	}
+	
+	return offsetArr;
+  }
+  
+  public void CompareOffsets(int x, int y){
+	if(playerSide == 'W' || playerSide == 'B'){
+		
+	  if(previousUROffset[1] > UROffset[1]){
+		UROffset[1] = previousUROffset[1];
+	  }
+	  if(previousUROffset[0] > UROffset[0]){
+		UROffset[0] = previousUROffset[0];
+	  }
+	  if(previousLROffset[1] > LROffset[1]){
+		LROffset[1] = previousLROffset[1];
+	  }
+	  if(previousLROffset[0] > LROffset[0]){
+		LROffset[0] = previousLROffset[0];
+	  }
+	  if(previousULOffset[1] > ULOffset[1]){
+		ULOffset[1] = previousULOffset[1];
+	  }
+	  if(previousULOffset[0] > ULOffset[0]){
+		ULOffset[0] = previousULOffset[0];
+	  }
+	  if(previousLLOffset[1] > LLOffset[1]){
+		LLOffset[1] = previousLLOffset[1];
+	  }
+	  if(previousLLOffset[0] > LLOffset[0]){
+		LLOffset[0] = previousLLOffset[0];
+	  }
+	}
+  }
+
+  public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+	System.out.println("Current Offsets: ");
+	System.out.print("URxOffset: " + UROffset[1] + " | ");
+	System.out.println("URyOffset: " + UROffset[0]);
+	System.out.print("LRxOffset: " + LROffset[1] + " | ");
+	System.out.println("LRyOffset: " + LROffset[0]);
+	System.out.print("ULxOffset: " + ULOffset[1] + " | ");
+	System.out.println("ULyOffset: " + ULOffset[0]);
+	System.out.print("LLxOffset: " + LLOffset[1] + " | ");
+	System.out.println("LLyOffset: " + LLOffset[0]);
+    int leftMax = x - leftBound;
+    int rightMax = rightBound - x;
+    int lowerMax = y - lowerBound;
+    int upperMax = upperBound - y;
+	
+    if (playerSide == 'W' || playerSide == 'B') {
+	  // Going -> Top Right
+	  for(int i = 1; i < upperMax - (UROffset[0]); i++){
+		for(int j = 1; j < rightMax - (UROffset[1]); j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Right
+	  for(int i = 1; i < lowerMax - (LROffset[0]); i++){
+		for(int j = 1; j < rightMax - (LROffset[1]); j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x + j, y - i });
+		  }
+	    }
+	  }
+	  // Going -> Top Left
+	  for(int i = 1; i < upperMax - (ULOffset[0]); i++){
+		for(int j = 1; j < leftMax - (ULOffset[1]); j++){
+		  if(j == i){
+            coordinatesList.add(new int[] { x - j, y + i });
+		  }
+	    }
+	  }
+	  // Going -> Bottom Left
+	  for(int i = 1; i < lowerMax - (LLOffset[0]); i++){
+		for(int j = 1; j < leftMax - (LLOffset[1]); j++){
 		  if(j == i){
             coordinatesList.add(new int[] { x - j, y - i });
 		  }
@@ -705,40 +750,10 @@ class Bishop extends ChessPiece {
     }
 	// ---- Black ----
 	else{
-	  // Going -> Top Right
-	  for(int i = 1; i <= upperMax; i++){
-		for(int j = 1; j <= rightMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x + j, y + i });
-		  }
-	    }
-	  }
-	  // Going -> Bottom Right
-	  for(int i = 1; i <= lowerMax; i++){
-		for(int j = 1; j <= rightMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x + j, y - i });
-		  }
-	    }
-	  }
-	  // Going -> Top Left
-	  for(int i = 1; i <= upperMax; i++){
-		for(int j = 1; j <= leftMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x - j, y + i });
-		  }
-	    }
-	  }
-	  // Going -> Bottom Left
-	  for(int i = 1; i <= lowerMax; i++){
-		for(int j = 1; j <= leftMax; j++){
-		  if(j == i){
-            coordinatesList.add(new int[] { x - j, y - i });
-		  }
-	    }
-	  }
+	  
 	}
-    return coordinatesList;
+    ResetOffsets();
+	return coordinatesList;
   }
 
   public void Move(int x, int y) {
@@ -748,91 +763,162 @@ class Bishop extends ChessPiece {
 
 class Knight extends ChessPiece {
   private char symbol = 'N';
+  final int leftBound = 1;
+  final int rightBound = 8;
+  final int lowerBound = 1;
+  final int upperBound = 8;
+  boolean[] directionCancel = new boolean[8];
 
   public Knight(int x, int y, char ps) {
     super(x, y, ps);
+	initializeDirectionCancel();
   }
 
   public char GetSymbol() {
     return symbol;
   }
+  
+  public void initializeDirectionCancel(){
+	for(int i = 0; i < 8; i++){
+	  directionCancel[i] = false;
+	}
+  }
+  
+  // Detects if a piece of the same side is on the same target coordinates
+  public void DetectCollision(JPanel[][] playSquares, int x, int y, ChessPiece cp){
+	
+	if (playerSide == 'W' && cp.IsAlive() && cp.GetPlayerSide() == 'W') {
+	  if(((y + 2) <= upperBound) && ((x + 1) <= rightBound)){
+		if(cp.GetXCoord() == x + 1 && cp.GetYCoord() == y + 2)
+          directionCancel[0] = true;
+	  }
+	  // Going -> 2 Top + Left
+	  if(((y + 2) <= upperBound) && ((x - 1) >= leftBound)){
+		if(cp.GetXCoord() == x - 1 && cp.GetYCoord() == y + 2)
+          directionCancel[1] = true;
+	  }
+	  // Going -> 2 Bottom + Right
+	  if(((y - 2) >= lowerBound) && ((x + 1) <= rightBound)){
+		if(cp.GetXCoord() == x + 1 && cp.GetYCoord() == y - 2)
+          directionCancel[2] = true;
+	  }
+	  // Going -> 2 Bottom + Left
+	  if(((y - 2) >= lowerBound) && ((x - 1) >= leftBound)){
+		if(cp.GetXCoord() == x - 1 && cp.GetYCoord() == y - 2)
+          directionCancel[3] = true;
+	  }
+	  // Going -> 2 Right + Top
+	  if(((x + 2) <= rightBound) && ((y + 1) <= upperBound)){
+		if(cp.GetXCoord() == x + 2 && cp.GetYCoord() == y + 1)
+          directionCancel[4] = true;
+	  }
+	  // Going -> 2 Right + Bottom
+	  if(((x + 2) <= rightBound) && ((y - 1) >= lowerBound)){
+		if(cp.GetXCoord() == x + 2 && cp.GetYCoord() == y - 1)
+          directionCancel[5] = true;
+	  }
+	  // Going -> 2 Left + Top
+	  if(((x - 2) >= leftBound) && ((y + 1) <= upperBound)){
+		if(cp.GetXCoord() == x - 2 && cp.GetYCoord() == y + 1)
+          directionCancel[6] = true;
+	  }
+	  // Going -> 2 Left + Bottom
+	  if(((x - 2) >= leftBound) && ((y - 1) >= lowerBound)){
+		if(cp.GetXCoord() == x - 2 && cp.GetYCoord() == y - 1)
+          directionCancel[7] = true;
+	  }
+	// ---- Black Side ---- // 
+	} else if (playerSide == 'B' && cp.IsAlive() && cp.GetPlayerSide() == 'B') {
+	  if(((y + 2) <= upperBound) && ((x + 1) <= rightBound)){
+		if(cp.GetXCoord() == x + 1 && cp.GetYCoord() == y + 2)
+          directionCancel[0] = true;
+	  }
+	  // Going -> 2 Top + Left
+	  if(((y + 2) <= upperBound) && ((x - 1) >= leftBound)){
+		if(cp.GetXCoord() == x - 1 && cp.GetYCoord() == y + 2)
+          directionCancel[1] = true;
+	  }
+	  // Going -> 2 Bottom + Right
+	  if(((y - 2) >= lowerBound) && ((x + 1) <= rightBound)){
+		if(cp.GetXCoord() == x + 1 && cp.GetYCoord() == y - 2)
+          directionCancel[2] = true;
+	  }
+	  // Going -> 2 Bottom + Left
+	  if(((y - 2) >= lowerBound) && ((x - 1) >= leftBound)){
+		if(cp.GetXCoord() == x - 1 && cp.GetYCoord() == y - 2)
+          directionCancel[3] = true;
+	  }
+	  // Going -> 2 Right + Top
+	  if(((x + 2) <= rightBound) && ((y + 1) <= upperBound)){
+		if(cp.GetXCoord() == x + 2 && cp.GetYCoord() == y + 1)
+          directionCancel[4] = true;
+	  }
+	  // Going -> 2 Right + Bottom
+	  if(((x + 2) <= rightBound) && ((y - 1) >= lowerBound)){
+		if(cp.GetXCoord() == x + 2 && cp.GetYCoord() == y - 1)
+          directionCancel[5] = true;
+	  }
+	  // Going -> 2 Left + Top
+	  if(((x - 2) >= leftBound) && ((y + 1) <= upperBound)){
+		if(cp.GetXCoord() == x - 2 && cp.GetYCoord() == y + 1)
+          directionCancel[6] = true;
+	  }
+	  // Going -> 2 Left + Bottom
+	  if(((x - 2) >= leftBound) && ((y - 1) >= lowerBound)){
+		if(cp.GetXCoord() == x - 2 && cp.GetYCoord() == y - 1)
+          directionCancel[7] = true;
+	  }	
+	}
+	  
+  }
 
   public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y) {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
-	int leftBound = 1;
-    int rightBound = 8;
-    int lowerBound = 1;
-    int upperBound = 8;
 	
-    if (playerSide == 'W') {
+    if (playerSide == 'W' || playerSide == 'B') {
 	  // Going -> 2 Top + Right
 	  if(((y + 2) <= upperBound) && ((x + 1) <= rightBound)){
+		if(directionCancel[0] == false)
         coordinatesList.add(new int[] { x + 1, y + 2});
 	  }
 	  // Going -> 2 Top + Left
 	  if(((y + 2) <= upperBound) && ((x - 1) >= leftBound)){
+		if(directionCancel[1] == false)
         coordinatesList.add(new int[] { x - 1, y + 2});
 	  }
 	  // Going -> 2 Bottom + Right
 	  if(((y - 2) >= lowerBound) && ((x + 1) <= rightBound)){
+		if(directionCancel[2] == false)
         coordinatesList.add(new int[] { x + 1, y - 2});
 	  }
 	  // Going -> 2 Bottom + Left
 	  if(((y - 2) >= lowerBound) && ((x - 1) >= leftBound)){
+		if(directionCancel[3] == false)
         coordinatesList.add(new int[] { x - 1, y - 2});
 	  }
 	  // Going -> 2 Right + Top
 	  if(((x + 2) <= rightBound) && ((y + 1) <= upperBound)){
+		if(directionCancel[4] == false)
         coordinatesList.add(new int[] { x + 2, y + 1});
 	  }
 	  // Going -> 2 Right + Bottom
 	  if(((x + 2) <= rightBound) && ((y - 1) >= lowerBound)){
+		if(directionCancel[5] == false)
         coordinatesList.add(new int[] { x + 2, y - 1});
 	  }
 	  // Going -> 2 Left + Top
 	  if(((x - 2) >= leftBound) && ((y + 1) <= upperBound)){
+		if(directionCancel[6] == false)
         coordinatesList.add(new int[] { x - 2, y + 1});
 	  }
 	  // Going -> 2 Left + Bottom
 	  if(((x - 2) >= leftBound) && ((y - 1) >= lowerBound)){
+		if(directionCancel[7] == false)
         coordinatesList.add(new int[] { x - 2, y - 1});
 	  }
-    } 
-	// ---- Black ----
-	else{
-	  // Going -> 2 Top + Right
-	  if(((y + 2) <= upperBound) && ((x + 1) <= rightBound)){
-        coordinatesList.add(new int[] { x + 1, y + 2});
-	  }
-	  // Going -> 2 Top + Left
-	  if(((y + 2) <= upperBound) && ((x - 1) >= leftBound)){
-        coordinatesList.add(new int[] { x - 1, y + 2});
-	  }
-	  // Going -> 2 Bottom + Right
-	  if(((y - 2) >= lowerBound) && ((x + 1) <= rightBound)){
-        coordinatesList.add(new int[] { x + 1, y - 2});
-	  }
-	  // Going -> 2 Bottom + Left
-	  if(((y - 2) >= lowerBound) && ((x - 1) >= leftBound)){
-        coordinatesList.add(new int[] { x - 1, y - 2});
-	  }
-	  // Going -> 2 Right + Top
-	  if(((x + 2) <= rightBound) && ((y + 1) <= upperBound)){
-        coordinatesList.add(new int[] { x + 2, y + 1});
-	  }
-	  // Going -> 2 Right + Bottom
-	  if(((x + 2) <= rightBound) && ((y - 1) >= lowerBound)){
-        coordinatesList.add(new int[] { x + 2, y - 1});
-	  }
-	  // Going -> 2 Left + Top
-	  if(((x - 2) >= leftBound) && ((y + 1) <= upperBound)){
-        coordinatesList.add(new int[] { x - 2, y + 1});
-	  }
-	  // Going -> 2 Left + Bottom
-	  if(((x - 2) >= leftBound) && ((y - 1) >= lowerBound)){
-        coordinatesList.add(new int[] { x - 2, y - 1});
-	  }
-    } 
+    }  
+	
+	initializeDirectionCancel();
     return coordinatesList;
   }
 
@@ -868,42 +954,50 @@ class Pawn extends ChessPiece {
 		  isBlocked = true;
         }
 	    // Diagonal right capture
-        if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y + 1)) {
+        if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y + 1)
+			&& cp.GetPlayerSide() == 'B') {
 		  choices[1] = true;
         }
 	    // Diagonal left capture
-	    if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y + 1)) {
+	    if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y + 1) 
+			&& cp.GetPlayerSide() == 'B') {
 		  choices[2] = true;
         }
 		// En Passant right
-		if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true  
+		    && cp.GetPlayerSide() == 'B') {
 		  choices[3] = true;
 		}
 		//En Passant left
-		if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true  
+		    && cp.GetPlayerSide() == 'B') {
 		  choices[4] = true;
         }
 		// ---- Black Side ----
-	  } else {
+	  } else if(playerSide == 'B' && cp.IsAlive()){
 		// Front movement (Blocked)
 	    if (cp.GetXCoord() == x && cp.GetYCoord() == (y - 1)) {
 		  choices[0] = true;
 		  isBlocked = true;
         }
 		// Diagonal right capture
-        if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y - 1)) {
+        if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y - 1) 
+			&& cp.GetPlayerSide() == 'W') {
 		  choices[1] = true;
         }
 	    // Diagonal left capture
-	    if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y - 1)) {
+	    if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y - 1) 
+			&& cp.GetPlayerSide() == 'W') {
 		  choices[2] = true;
         }
 		// En Passant right
-		if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true 
+		&& cp.GetPlayerSide() == 'W') {
 		  choices[3] = true;
 		}
 		//En Passant left
-		if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true) {
+		if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice() == true 
+		&& cp.GetPlayerSide() == 'W') {
 		  choices[4] = true;
 	    }
 	  }
