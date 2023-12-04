@@ -2,10 +2,12 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.nio.channels.OverlappingFileLockException;
 
 import javax.swing.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ChessFrame extends JFrame {
@@ -227,31 +229,32 @@ public class ChessFrame extends JFrame {
 
     // ---- Piece Selection ---- //
     // From java.lang.Class<T>, using .getClass().getName()
-    switch(copiedPiece.getClass().getName()){
-	  case "Pawn":
-	    coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
-	    System.out.println("Pawn ");
-	    break;
-	  case "Rook":
-	    coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
-	    System.out.println("Rook ");
-	    break;
-	  case "Bishop":
-	    coordinatesList = ModifyBishopMovement(pivotxCoord, pivotyCoord);
-	    System.out.println("Bishop ");
-	    break;
-	  case "Knight":
-	    coordinatesList = ModifyKnightMovement(pivotxCoord, pivotyCoord);
-	    System.out.println("Knight ");
-	    break;
-	  case "Queen":
-	    coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
-	    System.out.println("Queen ");
-	    break;
-	  case "King":
-	    System.out.println("King ");
-	    break;
-	}
+    switch (copiedPiece.getClass().getName()) {
+      case "Pawn":
+        coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
+        System.out.println("Pawn ");
+        break;
+      case "Rook":
+        coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
+        System.out.println("Rook ");
+        break;
+      case "Bishop":
+        coordinatesList = ModifyBishopMovement(pivotxCoord, pivotyCoord);
+        System.out.println("Bishop ");
+        break;
+      case "Knight":
+        coordinatesList = ModifyKnightMovement(pivotxCoord, pivotyCoord);
+        System.out.println("Knight ");
+        break;
+      case "Queen":
+        coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
+        System.out.println("Queen ");
+        break;
+      case "King":
+        coordinatesList = ModifyKingMovement(copiedPiece.GetPlayerSide(), ChessPieceContainer, playSquare);
+        System.out.println("King ");
+        break;
+    }
 
     SelectedCoordinatesList = coordinatesList;
 
@@ -290,33 +293,33 @@ public class ChessFrame extends JFrame {
 
     return coordinatesList;
   }
-  
-   public ArrayList<int[]> ModifyBishopMovement(int x, int y){
-	// To access Bishop only methods
-	Bishop copiedBishop = (Bishop)copiedPiece;
-	ArrayList<int[]> coordinatesList = new ArrayList<>();
-	
-	for (int i = 0; i < numPieces; i++) {
-	  copiedBishop.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+
+  public ArrayList<int[]> ModifyBishopMovement(int x, int y) {
+    // To access Bishop only methods
+    Bishop copiedBishop = (Bishop) copiedPiece;
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+
+    for (int i = 0; i < numPieces; i++) {
+      // copiedBishop.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
     }
-	
-	coordinatesList = copiedBishop.ValidMoves(playSquare, x, y);
-	
-	return coordinatesList;
+
+    coordinatesList = copiedBishop.ValidMoves(playSquare, x, y);
+
+    return coordinatesList;
   }
-  
-  public ArrayList<int[]> ModifyKnightMovement(int x, int y){
-	// To access Bishop only methods
-	Knight copiedKnight = (Knight)copiedPiece;
-	ArrayList<int[]> coordinatesList = new ArrayList<>();
-	
-	for (int i = 0; i < numPieces; i++) {
-	  copiedKnight.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
+
+  public ArrayList<int[]> ModifyKnightMovement(int x, int y) {
+    // To access Bishop only methods
+    Knight copiedKnight = (Knight) copiedPiece;
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+
+    for (int i = 0; i < numPieces; i++) {
+      // copiedKnight.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
     }
-	
-	coordinatesList = copiedKnight.ValidMoves(playSquare, x, y);
-	
-	return coordinatesList;
+
+    coordinatesList = copiedKnight.ValidMoves(playSquare, x, y);
+
+    return coordinatesList;
   }
 
   public ArrayList<int[]> ModifyQueenMovement(int x, int y) {
@@ -331,6 +334,48 @@ public class ChessFrame extends JFrame {
     coordinatesList = copiedQueen.ValidMoves(playSquare, x, y);
 
     return coordinatesList;
+  }
+
+  public ArrayList<int[]> ModifyKingMovement(char playerSide, ChessPiece[] ChessPieceContainer, JPanel[][] playSqaure) {
+    ArrayList<int[]> opponentsMoves = new ArrayList<>();
+    ArrayList<int[]> KingMoves = new ArrayList<>();
+    // Adds all of their moves to an ArrayList
+    for (int i = 0; i < 32; i++) {
+      if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == playerSide) {
+        // If this is our king
+        KingMoves = ChessPieceContainer[i].ValidMoves(playSquare, ChessPieceContainer[i].GetXCoord(),
+            ChessPieceContainer[i].GetYCoord());
+      } else if (ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetPlayerSide() != playerSide) {
+        // If the opponent's chess piece is alive
+        ArrayList<int[]> tempMoves = ChessPieceContainer[i].ValidMoves(playSquare, ChessPieceContainer[i].GetXCoord(),
+            ChessPieceContainer[i].GetYCoord());
+        for (int[] moves : tempMoves) {
+          int x = moves[0];
+          int y = moves[1];
+          opponentsMoves.add(new int[] { x, y });
+        }
+      }
+    }
+    ArrayList<int[]> AvailableMoves = new ArrayList<>();
+    for (int[] moves : KingMoves) {
+      int kingX = moves[0];
+      int kingY = moves[1];
+
+      boolean shouldAdd = true;
+
+      // Remove all the moves that would put it in check
+      for (int[] theirMoves : opponentsMoves) {
+        int theirX = theirMoves[0];
+        int theirY = theirMoves[1];
+        if (kingX == theirX && kingY == theirY) {
+          // Move shouldnt be added to the available moves arr
+          shouldAdd = false;
+        }
+      }
+      if (shouldAdd == true)
+        AvailableMoves.add(new int[] { kingX, kingY });
+    }
+    return AvailableMoves;
   }
 
   // ------------ Move Functions ------------ //
