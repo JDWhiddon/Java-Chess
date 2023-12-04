@@ -88,7 +88,7 @@ public class ChessFrame extends JFrame {
     }
 
     // Sets up the board
-    DefaultGameSetup();
+    DefaultGameSetup(ChessPieceContainer);
     // TestGameSetup();
   }
 
@@ -107,7 +107,7 @@ public class ChessFrame extends JFrame {
   }
 
   // Initialize pieces on the board
-  private void DefaultGameSetup() {
+  private void DefaultGameSetup(ChessPiece[] ChessPieceContainer) {
     numPieces = 32;
     /*
      * ---- Filling the ChessPieceContainer with pieces ----
@@ -147,6 +147,10 @@ public class ChessFrame extends JFrame {
      * A PlacePiece function may be added in place
      * An ArrayList may also be used instead of an array
      */
+    DisplayOnBoard(ChessPieceContainer);
+  }
+
+  public void DisplayOnBoard(ChessPiece[] board) {
     for (int i = 0; i < numPieces; i++) {
       /*
        * EX for below method:
@@ -255,10 +259,11 @@ public class ChessFrame extends JFrame {
         System.out.println("King ");
         break;
     }
-
     SelectedCoordinatesList = coordinatesList;
+    SelectedCoordinatesList = CheckForMates(coordinatesList,
+        copiedPiece.GetPlayerSide(), ChessPieceContainer);
 
-    for (int[] coordinates : coordinatesList) {
+    for (int[] coordinates : SelectedCoordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
   }
@@ -379,38 +384,38 @@ public class ChessFrame extends JFrame {
   }
 
   // ------------ Move Functions ------------ //
-  public void MakeMove(int x, int y, int newX, int newY) {
+  public void MakeMove(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
 
-    boolean canMove = MoveValidator(x, y, newX, newY);
+    boolean canMove = MoveValidator(x, y, newX, newY, board, piece);
 
     if (canMove == true) {
-      copiedPiece.SetYCoord(newY);
-      copiedPiece.SetXCoord(newX);
+      piece.SetYCoord(newY);
+      piece.SetXCoord(newX);
     }
     UpdatePieces();
   }
 
   // -------- Move Helper Functions -------- //
   // Determines an action for a move
-  private boolean MoveValidator(int x, int y, int newX, int newY) {
+  private boolean MoveValidator(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
     boolean canMove = true;
     for (int i = 0; i < numPieces; i++) {
       // Checks to see if the piece moved on top of another, and removes it if so
-      if (ChessPieceContainer[i].GetXCoord() == newX && ChessPieceContainer[i].GetYCoord() == newY
-          && ChessPieceContainer[i].IsAlive()) {
-        if (ChessPieceContainer[i].GetPlayerSide() != copiedPiece.GetPlayerSide()) {
-          ChessPieceContainer[i].RemovePiece();
+      if (board[i].GetXCoord() == newX && board[i].GetYCoord() == newY
+          && board[i].IsAlive()) {
+        if (board[i].GetPlayerSide() != piece.GetPlayerSide()) {
+          board[i].RemovePiece();
           System.out.println("Piece taken!");
         } else {
           canMove = false;
         }
       }
     }
-    if (copiedPiece.getClass().getName() == "Pawn") {
+    if (piece.getClass().getName() == "Pawn") {
       // Special cases
       // EnPassant(x, y, newX, newY);
-      copiedPiece.SetYCoord(newY);
-      copiedPiece.SetXCoord(newX);
+      piece.SetYCoord(newY);
+      piece.SetXCoord(newX);
       CheckForPromotion(newX, newY);
     }
     return canMove;
@@ -502,6 +507,69 @@ public class ChessFrame extends JFrame {
       }
     }
 
+  }
+
+  public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
+      ChessPiece[] realBoard) {
+    // This ArrayList will store all of the moves that WONT put the king in check
+    ArrayList<int[]> ReturnMoves = new ArrayList<>();
+    int kingX = 0;
+    int kingY = 0;
+    // Finds our king
+    for (int i = 0; i < 32; i++) {
+      if (realBoard[i].GetSymbol() == 'K' && realBoard[i].GetPlayerSide() == playerSide) {
+        // If this is our king
+        kingX = realBoard[i].GetXCoord();
+        kingY = realBoard[i].GetYCoord();
+      }
+    }
+    // Check to see if making the move would put our king in check
+    for (int[] move : coordinatesList) {
+      int x = move[0];
+      int y = move[1];
+      ChessPiece[] tempBoard = new ChessPiece[32];
+      DefaultGameSetup(tempBoard);
+
+      for (int i = 0; i < 32; i++) {
+        tempBoard[i].SetXCoord(ChessPieceContainer[i].GetXCoord());
+        tempBoard[i].SetYCoord(ChessPieceContainer[i].GetYCoord());
+      }
+      int tempPiece = returnNewCopiedPiece(tempBoard);
+      // tempBoard[tempPiece].SetXCoord(x);
+      // tempBoard[tempPiece].SetYCoord(y);
+      MakeMove(tempBoard[tempPiece].GetXCoord(), tempBoard[tempPiece].GetYCoord(), x, y, tempBoard,
+          tempBoard[tempPiece]);
+      if (!isKingInCheck(playerSide, kingX, kingY, tempBoard)) {
+        ReturnMoves.add(new int[] { x, y });
+      }
+    }
+    return ReturnMoves;
+  }
+
+  public int returnNewCopiedPiece(ChessPiece[] tempBoard) {
+    for (int i = 0; i < numPieces; i++) {
+      if (copiedPiece.GetXCoord() == tempBoard[i].GetXCoord() && copiedPiece.GetYCoord() == tempBoard[i].GetYCoord())
+        return i;
+    }
+    return 0;
+  }
+
+  public boolean isKingInCheck(char playerSide, int kingX, int kingY, ChessPiece[] board) {
+    for (int i = 0; i < 32; i++) {
+      if (board[i].IsAlive() && board[i].GetPlayerSide() != playerSide) {
+        // If the opponent's chess piece is alive
+        ArrayList<int[]> opponentMoves = board[i].ValidMoves(playSquare, board[i].GetXCoord(), board[i].GetYCoord());
+        for (int[] opponentMove : opponentMoves) {
+          int opponentX = opponentMove[0];
+          int opponentY = opponentMove[1];
+          // Check if the opponent's move captures the king
+          if (opponentX == kingX && opponentY == kingY) {
+            return true; // King is in check
+          }
+        }
+      }
+    }
+    return false; // King is not in check
   }
 
   // Needed to update the board after a piece is moved
@@ -629,7 +697,8 @@ public class ChessFrame extends JFrame {
             if (e.getSource() == playSquare[i][j]) {
               for (int[] coordinates : SelectedCoordinatesList) {
                 if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
-                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i);
+                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i, ChessPieceContainer,
+                      copiedPiece);
                   ResetBoardBackground();
                   UpdatePieces();
                   // ---- Deselect ----
