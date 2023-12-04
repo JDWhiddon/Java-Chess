@@ -260,8 +260,12 @@ public class ChessFrame extends JFrame {
         break;
     }
     SelectedCoordinatesList = coordinatesList;
-    SelectedCoordinatesList = CheckForMates(coordinatesList,
-        copiedPiece.GetPlayerSide(), ChessPieceContainer);
+    if (copiedPiece.GetSymbol() != 'K') {
+      SelectedCoordinatesList = CheckForMates(coordinatesList,
+          copiedPiece.GetPlayerSide(), ChessPieceContainer);
+    } else {
+      SelectedCoordinatesList = coordinatesList;
+    }
 
     for (int[] coordinates : SelectedCoordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
@@ -535,6 +539,9 @@ public class ChessFrame extends JFrame {
         tempBoard[i].SetYCoord(ChessPieceContainer[i].GetYCoord());
       }
       int tempPiece = returnNewCopiedPiece(tempBoard);
+      if (tempBoard[tempPiece].GetSymbol() == 'K') {
+        System.out.println("King detected bruh");
+      }
       // tempBoard[tempPiece].SetXCoord(x);
       // tempBoard[tempPiece].SetYCoord(y);
       MakeMove(tempBoard[tempPiece].GetXCoord(), tempBoard[tempPiece].GetYCoord(), x, y, tempBoard,
