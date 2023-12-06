@@ -44,8 +44,8 @@ public class ChessFrame extends JFrame {
    */
   private boolean isSelected = false;
   /* Extracted coords from ChessPiece object */
-  private int xCoord;
-  private int yCoord;
+  //private int xCoord;
+  //private int yCoord;
   /* Valid moves from the selected piece */
   ArrayList<int[]> SelectedCoordinatesList;
 
@@ -157,10 +157,12 @@ public class ChessFrame extends JFrame {
        * (1,1) gets taken in and is translated to be [7][0] in the array
        * where [7] is the i index (yCoord) and [0] is the j index (xCoord)
        */
-      TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
+      int xCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetXCoord(), 'X');
+      int yCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetYCoord(), 'Y');
       // The JPanel adds a new JLabel that represents a piece at the selected
       // coordinates
       playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+			ChessPieceContainer[i].SetMoveStatus(false);
       // Experimental, may be unused
       ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
     }
@@ -170,14 +172,14 @@ public class ChessFrame extends JFrame {
 		for(int i = 0; i < numPieces; i++){
 			if(turnCount % 2 == 0){
 				if(ChessPieceContainer[i].GetPlayerSide() == 'B'){
-					ChessPieceContainer[i].SetMoveStatus(true);
-				} else
-					ChessPieceContainer[i].SetMoveStatus(false);
+					ChessPieceContainer[i].SetMoveableStatus(true);
+				} else if(ChessPieceContainer[i].GetPlayerSide() == 'W')
+					ChessPieceContainer[i].SetMoveableStatus(false);
 			} else {
 				if(ChessPieceContainer[i].GetPlayerSide() == 'W'){
-					ChessPieceContainer[i].SetMoveStatus(true);
-				} else
-					ChessPieceContainer[i].SetMoveStatus(false);
+					ChessPieceContainer[i].SetMoveableStatus(true);
+				} else if(ChessPieceContainer[i].GetPlayerSide() == 'B')
+					ChessPieceContainer[i].SetMoveableStatus(false);
 			}
 		}
 	}
@@ -209,7 +211,8 @@ public class ChessFrame extends JFrame {
     // A PlacePiece function may be added in place, an ArrayList may also be used
     // instead of an array
     for (int i = 0; i < numPieces; i++) {
-      TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
+      int xCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetXCoord(), 'X');
+      int yCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetYCoord(), 'Y');
       playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
     }
   }
@@ -221,11 +224,11 @@ public class ChessFrame extends JFrame {
     // A copiedPiece needs to be passed through several methods without being needed
     // as a parameter
     copiedPiece = new NullPiece(1, 1, 'N');
-    TranslateCoordinates(x, y);
+    int xCoord = TranslatePieceCoordinates(x, 'X');
+    int yCoord = TranslatePieceCoordinates(y, 'Y');
     for (int i = 0; i < numPieces; i++) {
       if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()
-          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetMoveStatus() == true) {
-        // From java.lang.Class<T>, using .getClass().getName()
+          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetMoveableStatus() == true) {
         copiedPiece = ChessPieceContainer[i];
         isSelected = true;
         ShowValidMoves(copiedPiece);
@@ -328,13 +331,12 @@ public class ChessFrame extends JFrame {
   // ------------ Move Functions ------------ //
   public void MakeMove(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
 
-    boolean canMove = MoveValidator(x, y, newX, newY, board, piece);
-
-    if (canMove == true) {
-      piece.SetYCoord(newY);
-      piece.SetXCoord(newX);
-			turnCount++;
+    if (MoveValidator(x, y, newX, newY, board, piece) == true) {
+			piece.SetMoveStatus(true);
+			piece.SetYCoord(newY);
+			piece.SetXCoord(newX);
     }
+		
     UpdatePieces();
   }
 
@@ -344,8 +346,7 @@ public class ChessFrame extends JFrame {
     boolean canMove = true;
     for (int i = 0; i < numPieces; i++) {
       // Checks to see if the piece moved on top of another, and removes it if so
-      if (board[i].GetXCoord() == newX && board[i].GetYCoord() == newY
-          && board[i].IsAlive()) {
+      if (board[i].GetXCoord() == newX && board[i].GetYCoord() == newY && board[i].IsAlive()) {
         if (board[i].GetPlayerSide() != piece.GetPlayerSide()) {
           board[i].RemovePiece();
           System.out.println("Piece taken!");
@@ -354,11 +355,12 @@ public class ChessFrame extends JFrame {
         }
       }
     }
+		
     if (piece.getClass().getName() == "Pawn") {
       // Special cases
       // EnPassant(x, y, newX, newY);
-      piece.SetYCoord(newY);
-      piece.SetXCoord(newX);
+      //piece.SetYCoord(newY);
+      //piece.SetXCoord(newX);
       CheckForPromotion(newX, newY);
     }
     return canMove;
@@ -532,7 +534,8 @@ public class ChessFrame extends JFrame {
     // it on the board
     for (int i = 0; i < numPieces; i++) {
       if (ChessPieceContainer[i].IsAlive()) {
-        TranslateCoordinates(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord());
+        int xCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetXCoord(), 'X');
+        int yCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetYCoord(), 'Y');
         playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
       }
     }
@@ -545,19 +548,37 @@ public class ChessFrame extends JFrame {
     }
   }
 
-  // Assuming the orientation is not flipped for now
-  // A flip indicator will be needed later
-  // Will be reusable later
-  private void TranslateCoordinates(int x, int y) {
+  // From piece coordinates to the playSquare 2D array
+  private int TranslatePieceCoordinates(int coord, char direction) {
     // Non-flipped
-    // Shift the coordinate down by one to fit in the 2D array
-    int translatedXCoord = (x - 1);
-    xCoord = translatedXCoord;
-
-    // Shift the coordinate down by one to fit in the 2D array
-    int translatedYCoord = (y - 1);
-    // Flip the coordinate to ensure untranslated y value 1 starts at the bottom
-    yCoord = (7 - translatedYCoord);
+		if(direction == 'X'){
+			// Shift the coordinate down by one to fit in the 2D array
+			int translatedXCoord = (coord - 1);
+			coord = translatedXCoord;
+		}
+		else if (direction == 'Y'){
+			// Shift the coordinate down by one to fit in the 2D array
+			int translatedYCoord = (coord - 1);
+			// Flip the coordinate to ensure untranslated y value 1 starts at the bottom
+			coord = (7 - translatedYCoord);
+		}
+		return coord;
+  }
+	
+	// From playSquare 2D array to piece coordinates
+  private int TranslateBoardCoordinates(int coord, char direction) {
+    // Non-flipped
+		if(direction == 'X'){
+			// Shift the coordinate up by one to fit in the 2D array
+			int translatedXCoord = (coord + 1);
+			coord = translatedXCoord;
+		}
+		else if (direction == 'Y'){
+			int translatedYCoord = coord;
+			// Flip the coordinate to ensure translated y value 1 starts at the top
+			coord = (8 - translatedYCoord);
+		}
+		return coord;
   }
 
   // Use the built in symbol from a piece object to find the correct image to
@@ -630,9 +651,12 @@ public class ChessFrame extends JFrame {
           for (int j = 0; j < 8; j++)
             // ---- Select ----
             if (e.getSource() == playSquare[i][j]) {
+							// Translate the loop indexes into piece coordinates
+							int xCoord = TranslateBoardCoordinates(j, 'X');
+							int yCoord = TranslateBoardCoordinates(i, 'Y');
 							DetermineTurnOrder();
-              selectPiece(j + 1, 8 - i);
-              isSelected = true;
+              selectPiece(xCoord, yCoord);
+							System.out.println("Turn Count: " + turnCount);
             }
         // ---- Move/Deselect ---- //
         // If the piece is already selected
@@ -642,14 +666,23 @@ public class ChessFrame extends JFrame {
         for (int i = 0; i < 8; i++)
           for (int j = 0; j < 8; j++)
             if (e.getSource() == playSquare[i][j]) {
+							// Search every coordinate in the list
               for (int[] coordinates : SelectedCoordinatesList) {
-                if (j + 1 == coordinates[0] && 8 - i == coordinates[1]) {
-                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), j + 1, 8 - i, ChessPieceContainer,
+								// Translate the loop indexes into piece coordinates
+								int xCoord = TranslateBoardCoordinates(j, 'X');
+								int yCoord = TranslateBoardCoordinates(i, 'Y');
+								// Match index coordinates to piece coordinates
+                if (xCoord == coordinates[0] && yCoord == coordinates[1]) {
+                  MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), xCoord, yCoord, ChessPieceContainer,
                       copiedPiece);
+									turnCount++;
+									System.out.println("New turn Count: " + turnCount);
+									//DetermineTurnOrder();
                   ResetBoardBackground();
                   UpdatePieces();
                   // ---- Deselect ----
-                } else if (j + 1 == copiedPiece.GetXCoord() && 8 - i == copiedPiece.GetYCoord()) {
+                } else if (xCoord == copiedPiece.GetXCoord() && yCoord == copiedPiece.GetYCoord()) {
+									System.out.println("Deselect Turn Count: " + turnCount);
                   ResetBoardBackground();
                   UpdatePieces();
                 }
