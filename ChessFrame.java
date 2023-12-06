@@ -209,10 +209,7 @@ public class ChessFrame extends JFrame {
       if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()
           && ChessPieceContainer[i].IsAlive()) {
         // From java.lang.Class<T>, using .getClass().getName()
-        // JOptionPane.showMessageDialog(null, "Selected Piece: " +
-        // ChessPieceContainer[i].getClass().getName());
         copiedPiece = ChessPieceContainer[i];
-        // index = i;
         isSelected = true;
         ShowValidMoves(copiedPiece);
       }
@@ -225,7 +222,7 @@ public class ChessFrame extends JFrame {
     int pivotxCoord = copiedPiece.GetXCoord();
     int pivotyCoord = copiedPiece.GetYCoord();
     boolean overrideValidMove = false;
-    ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(playSquare, pivotxCoord, pivotyCoord);
+    ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(pivotxCoord, pivotyCoord, ChessPieceContainer);
 
     // Resets the background of each square, so that the moves reset when
     // deselecting a piece
@@ -237,22 +234,6 @@ public class ChessFrame extends JFrame {
       case "Pawn":
         coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
         System.out.println("Pawn ");
-        break;
-      case "Rook":
-        coordinatesList = ModifyRookMovement(pivotxCoord, pivotyCoord);
-        System.out.println("Rook ");
-        break;
-      case "Bishop":
-        coordinatesList = ModifyBishopMovement(pivotxCoord, pivotyCoord);
-        System.out.println("Bishop ");
-        break;
-      case "Knight":
-        coordinatesList = ModifyKnightMovement(pivotxCoord, pivotyCoord);
-        System.out.println("Knight ");
-        break;
-      case "Queen":
-        coordinatesList = ModifyQueenMovement(pivotxCoord, pivotyCoord);
-        System.out.println("Queen ");
         break;
       case "King":
         coordinatesList = ModifyKingMovement(copiedPiece.GetPlayerSide(), ChessPieceContainer, playSquare);
@@ -280,67 +261,7 @@ public class ChessFrame extends JFrame {
     Pawn copiedPawn = (Pawn) copiedPiece;
     ArrayList<int[]> coordinatesList = new ArrayList<>();
 
-    for (int i = 0; i < numPieces; i++) {
-      copiedPawn.DetectSpecialMove(playSquare, x, y, ChessPieceContainer[i]);
-    }
-
-    coordinatesList = copiedPawn.PawnSpecialMove(playSquare, x, y);
-
-    return coordinatesList;
-  }
-
-  public ArrayList<int[]> ModifyRookMovement(int x, int y) {
-    // To access Rook only methods
-    Rook copiedRook = (Rook) copiedPiece;
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-
-    for (int i = 0; i < numPieces; i++) {
-      copiedRook.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
-    }
-
-    coordinatesList = copiedRook.ValidMoves(playSquare, x, y);
-
-    return coordinatesList;
-  }
-
-  public ArrayList<int[]> ModifyBishopMovement(int x, int y) {
-    // To access Bishop only methods
-    Bishop copiedBishop = (Bishop) copiedPiece;
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-
-    for (int i = 0; i < numPieces; i++) {
-      // copiedBishop.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
-    }
-
-    coordinatesList = copiedBishop.ValidMoves(playSquare, x, y);
-
-    return coordinatesList;
-  }
-
-  public ArrayList<int[]> ModifyKnightMovement(int x, int y) {
-    // To access Bishop only methods
-    Knight copiedKnight = (Knight) copiedPiece;
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-
-    for (int i = 0; i < numPieces; i++) {
-      // copiedKnight.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
-    }
-
-    coordinatesList = copiedKnight.ValidMoves(playSquare, x, y);
-
-    return coordinatesList;
-  }
-
-  public ArrayList<int[]> ModifyQueenMovement(int x, int y) {
-    // To access Queen only methods
-    Queen copiedQueen = (Queen) copiedPiece;
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-
-    for (int i = 0; i < numPieces; i++) {
-      copiedQueen.DetectCollision(playSquare, x, y, ChessPieceContainer[i]);
-    }
-
-    coordinatesList = copiedQueen.ValidMoves(playSquare, x, y);
+    coordinatesList = copiedPawn.PawnSpecialMove(playSquare, x, y, ChessPieceContainer);
 
     return coordinatesList;
   }
@@ -352,12 +273,12 @@ public class ChessFrame extends JFrame {
     for (int i = 0; i < 32; i++) {
       if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == playerSide) {
         // If this is our king
-        KingMoves = ChessPieceContainer[i].ValidMoves(playSquare, ChessPieceContainer[i].GetXCoord(),
-            ChessPieceContainer[i].GetYCoord());
+        KingMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
+            ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
       } else if (ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetPlayerSide() != playerSide) {
         // If the opponent's chess piece is alive
-        ArrayList<int[]> tempMoves = ChessPieceContainer[i].ValidMoves(playSquare, ChessPieceContainer[i].GetXCoord(),
-            ChessPieceContainer[i].GetYCoord());
+        ArrayList<int[]> tempMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
+            ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
         for (int[] moves : tempMoves) {
           int x = moves[0];
           int y = moves[1];
@@ -484,7 +405,7 @@ public class ChessFrame extends JFrame {
   }
 
   public void EnPassant(int x, int y, int newX, int newY) {
-
+	/*
     // To access pawn only methods
     Pawn copiedPawn = (Pawn) copiedPiece;
 
@@ -510,7 +431,7 @@ public class ChessFrame extends JFrame {
         }
       }
     }
-
+		*/
   }
 
   public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
@@ -565,7 +486,7 @@ public class ChessFrame extends JFrame {
     for (int i = 0; i < 32; i++) {
       if (board[i].IsAlive() && board[i].GetPlayerSide() != playerSide) {
         // If the opponent's chess piece is alive
-        ArrayList<int[]> opponentMoves = board[i].ValidMoves(playSquare, board[i].GetXCoord(), board[i].GetYCoord());
+        ArrayList<int[]> opponentMoves = board[i].ValidMoves(board[i].GetXCoord(), board[i].GetYCoord(), ChessPieceContainer);
         for (int[] opponentMove : opponentMoves) {
           int opponentX = opponentMove[0];
           int opponentY = opponentMove[1];
