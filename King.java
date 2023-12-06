@@ -125,7 +125,7 @@ public class King extends ChessPiece {
 	}
 
 	// Search each valid move within the bounds of the board
-	public ArrayList<int[]> ValidMoves(JPanel[][] playSquares, int x, int y, ChessPiece[] copyPieceContainer) {
+	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
 		for (int i = 0; i < 32; i++) {
