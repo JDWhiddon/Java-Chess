@@ -12,7 +12,7 @@ public abstract class ChessPiece {
 	protected char playerSide = ' ';
 	protected boolean isAlive = true;
 	protected boolean isSelected = false;
-	protected boolean player = false;
+	protected boolean canMoveOnTurn = false;
 	protected int turn;
 	// May mess with the JLabels in each specific JPanel later
 	protected JLabel jlabelCopy;
@@ -86,5 +86,13 @@ public abstract class ChessPiece {
 
 	public boolean IsSelected() {
 		return isSelected;
+	}
+	
+	public void SetMoveStatus(boolean s){
+		canMoveOnTurn = s;
+	}
+	
+	public boolean GetMoveStatus(){
+		return canMoveOnTurn;
 	}
 }

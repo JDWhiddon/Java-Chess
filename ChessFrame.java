@@ -165,6 +165,23 @@ public class ChessFrame extends JFrame {
       ChessPieceContainer[i].SetJLabel(SymbolToLabel(ChessPieceContainer[i]));
     }
   }
+	
+	public void DetermineTurnOrder(){
+		for(int i = 0; i < numPieces; i++){
+			if(turnCount % 2 == 0){
+				if(ChessPieceContainer[i].GetPlayerSide() == 'B'){
+					ChessPieceContainer[i].SetMoveStatus(true);
+				} else
+					ChessPieceContainer[i].SetMoveStatus(false);
+			} else {
+				if(ChessPieceContainer[i].GetPlayerSide() == 'W'){
+					ChessPieceContainer[i].SetMoveStatus(true);
+				} else
+					ChessPieceContainer[i].SetMoveStatus(false);
+			}
+		}
+	}
+	
 
   // Initialize specific pieces for testing purposes
   private void TestGameSetup() {
@@ -207,7 +224,7 @@ public class ChessFrame extends JFrame {
     TranslateCoordinates(x, y);
     for (int i = 0; i < numPieces; i++) {
       if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()
-          && ChessPieceContainer[i].IsAlive()) {
+          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetMoveStatus() == true) {
         // From java.lang.Class<T>, using .getClass().getName()
         copiedPiece = ChessPieceContainer[i];
         isSelected = true;
@@ -316,6 +333,7 @@ public class ChessFrame extends JFrame {
     if (canMove == true) {
       piece.SetYCoord(newY);
       piece.SetXCoord(newX);
+			turnCount++;
     }
     UpdatePieces();
   }
@@ -612,6 +630,7 @@ public class ChessFrame extends JFrame {
           for (int j = 0; j < 8; j++)
             // ---- Select ----
             if (e.getSource() == playSquare[i][j]) {
+							DetermineTurnOrder();
               selectPiece(j + 1, 8 - i);
               isSelected = true;
             }
