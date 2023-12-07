@@ -17,6 +17,7 @@ public class ChessFrame extends JFrame {
   Color cream = new Color(238, 238, 210);
   Color green = new Color(118, 150, 86);
   Color validMoveColor = new Color(255, 255, 0);
+  Color checkColor = new Color(255, 0, 0);
 
   /*
    * -- Container for the in play chess pieces --
@@ -104,6 +105,9 @@ public class ChessFrame extends JFrame {
           playSquare[i][j].setBackground(green);
       }
     }
+    // Changes the background to red if the king is in check
+    isKingInCheck('W', ChessPieceContainer);
+    isKingInCheck('B', ChessPieceContainer);
   }
 
   // Initialize pieces on the board
@@ -245,6 +249,7 @@ public class ChessFrame extends JFrame {
 
     // Resets the background of each square, so that the moves reset when
     // deselecting a piece
+
     ResetBoardBackground();
 
     // ---- Piece Selection ---- //
@@ -266,11 +271,10 @@ public class ChessFrame extends JFrame {
     for (int[] coordinates : SelectedCoordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
-
   }
 
   // -------- Valid Move Helper Functions -------- //
-  // Shows valid pawn movement based on the position of other pieces
+  // Shows valid pawn movement based on the posmakemoveition of other pieces
   // May integrate into the pawn class if possible
   public ArrayList<int[]> ModifyPawnMovement(int x, int y) {
     // To access pawn only methods
@@ -470,7 +474,7 @@ public class ChessFrame extends JFrame {
       // tempBoard[tempPiece].SetYCoord(y);
       MakeMove(tempBoard[tempPiece].GetXCoord(), tempBoard[tempPiece].GetYCoord(), x, y, tempBoard,
           tempBoard[tempPiece]);
-      if (!isKingInCheck(playerSide, kingX, kingY, tempBoard)) {
+      if (!isKingInCheck(playerSide, tempBoard)) {
         ReturnMoves.add(new int[] { x, y });
       }
     }
@@ -489,8 +493,16 @@ public class ChessFrame extends JFrame {
     return 0;
   }
 
-  public boolean isKingInCheck(char playerSide, int kingX, int kingY, ChessPiece[] board) {
+  public boolean isKingInCheck(char playerSide, ChessPiece[] board) {
     // Adds all of their moves to an ArrayList
+    int kingX = 0;
+    int kingY = 0;
+    for (int i = 0; i < 32; i++) {
+      if (ChessPieceContainer[i].GetPlayerSide() == playerSide && ChessPieceContainer[i].GetSymbol() == 'K') {
+        kingX = ChessPieceContainer[i].GetXCoord();
+        kingY = ChessPieceContainer[i].GetYCoord();
+      }
+    }
     ArrayList<int[]> opponentsMoves = new ArrayList<>();
     for (int i = 0; i < 32; i++) {
       if (board[i].IsAlive() &&
@@ -510,6 +522,8 @@ public class ChessFrame extends JFrame {
       int theirY = theirMoves[1];
       if (kingX == theirX && kingY == theirY) {
         // Move shouldnt be added to the available moves arr
+        playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
+        UpdatePieces();
         return true;
       }
     }
@@ -672,6 +686,7 @@ public class ChessFrame extends JFrame {
                   turnCount++;
                   System.out.println("New turn Count: " + turnCount);
                   // DetermineTurnOrder();
+                  // If the kings are in check, paint
                   ResetBoardBackground();
                   UpdatePieces();
                   break;

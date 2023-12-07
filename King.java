@@ -194,7 +194,6 @@ public class King extends ChessPiece {
 				// If the opponent's chess piece is alive
 				tempMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
 						ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
-				System.out.println("Class: " + ChessPieceContainer[i].getClass().getName());
 			}
 			for (int[] moves : tempMoves) {
 				int tempX = moves[0];

@@ -134,7 +134,6 @@ public class Pawn extends ChessPiece {
 	}
 
 	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
-		System.out.println("Running");
 		movedTwice = false;
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
