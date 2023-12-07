@@ -183,6 +183,13 @@ public class King extends ChessPiece {
 		ArrayList<int[]> KingMoves = new ArrayList<>();
 		ArrayList<int[]> tempMoves = new ArrayList<>();
 		KingMoves = TheKingsMoves(GetXCoord(), GetYCoord(), ChessPieceContainer);
+		for (int coords[] : KingMoves) {
+			for (int i = 0; i < 32; i++) {
+				if (ChessPieceContainer[i].GetXCoord() == coords[0] && ChessPieceContainer[i].GetYCoord() == coords[1]
+						&& ChessPieceContainer[i].IsAlive())
+					opponentsMoves.add(new int[] { coords[0], coords[1] });
+			}
+		}
 
 		// Adds all of their moves to an ArrayList
 		for (int i = 0; i < 32; i++) {

@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.lang.reflect.Array;
 import java.nio.channels.OverlappingFileLockException;
 
 import javax.swing.*;
@@ -106,8 +107,11 @@ public class ChessFrame extends JFrame {
       }
     }
     // Changes the background to red if the king is in check
-    isKingInCheck('W', ChessPieceContainer);
-    isKingInCheck('B', ChessPieceContainer);
+    ArrayList<int[]> tempMoves = new ArrayList<>();
+
+    if (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer)) {
+      CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
+    }
   }
 
   // Initialize pieces on the board
@@ -241,7 +245,7 @@ public class ChessFrame extends JFrame {
 
   // Displays the valid moves on the board
   // Triggered by clicks
-  public void ShowValidMoves(ChessPiece selectedPiece) {
+  public ArrayList<int[]> ShowValidMoves(ChessPiece selectedPiece) {
     int pivotxCoord = copiedPiece.GetXCoord();
     int pivotyCoord = copiedPiece.GetYCoord();
     boolean overrideValidMove = false;
@@ -263,7 +267,7 @@ public class ChessFrame extends JFrame {
     SelectedCoordinatesList = coordinatesList;
     if (copiedPiece.GetSymbol() != 'K') {
       SelectedCoordinatesList = CheckForMates(coordinatesList,
-          copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece);
+          copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
     } else {
       SelectedCoordinatesList = coordinatesList;
     }
@@ -271,6 +275,7 @@ public class ChessFrame extends JFrame {
     for (int[] coordinates : SelectedCoordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
+    return SelectedCoordinatesList;
   }
 
   // -------- Valid Move Helper Functions -------- //
@@ -294,7 +299,6 @@ public class ChessFrame extends JFrame {
       piece.SetYCoord(newY);
       piece.SetXCoord(newX);
     }
-
     UpdatePieces();
   }
 
@@ -322,6 +326,31 @@ public class ChessFrame extends JFrame {
       CheckForPromotion(newX, newY);
     }
     return canMove;
+  }
+
+  public void PrintWinnerDialog(char winner) {
+    ImageIcon winnerIcon = new ImageIcon();
+    if (winner == 'W') {
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/WKing.png"));
+    } else {
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("ResourcesBKing.png"));
+    }
+    JLabel yes = new JLabel("Play again");
+    JLabel no = new JLabel("Quit");
+    String[] YesOrNo = { "Play again", "Quit" };
+    int n = JOptionPane.showOptionDialog(this, "You won! Congratulations!",
+        "Cgheck", JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE, winnerIcon, YesOrNo, no);
+    if (n == -1)
+      n = 1;
+
+    if (n == 1) {
+      System.exit(0);
+    } else {
+      DefaultGameSetup(ChessPieceContainer);
+      UpdatePieces();
+    }
+
   }
 
   public void CheckForPromotion(int x, int y) {
@@ -418,7 +447,31 @@ public class ChessFrame extends JFrame {
   }
 
   public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
-      ChessPiece[] realBoard, ChessPiece selectedPiece) {
+      ChessPiece[] realBoard, ChessPiece selectedPiece, int RecursiveCall) {
+
+    if (RecursiveCall == 1 && (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer))) {
+      boolean canMove = true;
+      for (int i = 0; i < 32; i++) {
+        if (ChessPieceContainer[i].GetPlayerSide() != playerSide) {
+          int tempX = ChessPieceContainer[i].GetXCoord();
+          int tempY = ChessPieceContainer[i].GetYCoord();
+          ArrayList<int[]> TempReturnMoves = CheckForMates(ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard),
+              playerSide, realBoard,
+              selectedPiece, 0);
+          if (TempReturnMoves.size() > 0) {
+            canMove = false;
+            if (isKingInCheck('W', realBoard))
+              PrintWinnerDialog('B');
+            else
+              PrintWinnerDialog('W');
+
+            break;
+          }
+        }
+      }
+      if (!canMove) {
+      }
+    }
     // This ArrayList will store all of the moves that WONT put the king in check
     ArrayList<int[]> ReturnMoves = new ArrayList<>();
     int kingX = 0;
@@ -686,7 +739,6 @@ public class ChessFrame extends JFrame {
                   turnCount++;
                   System.out.println("New turn Count: " + turnCount);
                   // DetermineTurnOrder();
-                  // If the kings are in check, paint
                   ResetBoardBackground();
                   UpdatePieces();
                   break;
