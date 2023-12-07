@@ -125,11 +125,11 @@ public class King extends ChessPiece {
 	}
 
 	// Search each valid move within the bounds of the board
-	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
+	public ArrayList<int[]> TheKingsMoves(int x, int y, ChessPiece[] ChessPieceContainer) {
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
 		for (int i = 0; i < 32; i++) {
-			CancelCoordinates(x, y, copyPieceContainer[i]);
+			CancelCoordinates(x, y, ChessPieceContainer[i]);
 		}
 
 		// Going -> Top //
@@ -172,10 +172,57 @@ public class King extends ChessPiece {
 			if (directionCancel[7] == false)
 				coordinatesList.add(new int[] { x - 1, y - 1 });
 		}
-
 		// Reset all directionCancel indicators to false for the next instance
 		// of a move
 		initializeDirectionCancel();
 		return coordinatesList;
+	}
+
+	public ArrayList<int[]> ValidMoves(int TheKingX, int TheKingY, ChessPiece[] ChessPieceContainer) {
+		ArrayList<int[]> opponentsMoves = new ArrayList<>();
+		ArrayList<int[]> KingMoves = new ArrayList<>();
+		ArrayList<int[]> tempMoves = new ArrayList<>();
+		KingMoves = TheKingsMoves(GetXCoord(), GetYCoord(), ChessPieceContainer);
+
+		// Adds all of their moves to an ArrayList
+		for (int i = 0; i < 32; i++) {
+			if (ChessPieceContainer[i].GetPlayerSide() != playerSide && ChessPieceContainer[i].GetSymbol() == 'K') {
+				tempMoves = TheKingsMoves(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(),
+						ChessPieceContainer);
+			} else if (ChessPieceContainer[i].IsAlive() &&
+					ChessPieceContainer[i].GetPlayerSide() != playerSide) {
+				// If the opponent's chess piece is alive
+				tempMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
+						ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
+				System.out.println("Class: " + ChessPieceContainer[i].getClass().getName());
+			}
+			for (int[] moves : tempMoves) {
+				int tempX = moves[0];
+				int tempY = moves[1];
+				opponentsMoves.add(new int[] { tempX, tempY });
+			}
+		}
+
+		ArrayList<int[]> AvailableMoves = new ArrayList<>();
+		for (int[] moves : KingMoves) {
+			int kingX = moves[0];
+			int kingY = moves[1];
+
+			boolean shouldAdd = true;
+
+			// Remove all the moves that would put it in check
+			for (int[] theirMoves : opponentsMoves) {
+				int theirX = theirMoves[0];
+				int theirY = theirMoves[1];
+				if (kingX == theirX && kingY == theirY) {
+					// Move shouldnt be added to the available moves arr
+					shouldAdd = false;
+				}
+			}
+			if (shouldAdd == true)
+				AvailableMoves.add(new int[] { kingX, kingY });
+		}
+
+		return AvailableMoves;
 	}
 }

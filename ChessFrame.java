@@ -254,10 +254,6 @@ public class ChessFrame extends JFrame {
         coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
         System.out.println("Pawn ");
         break;
-      case "King":
-        coordinatesList = ModifyKingMovement(copiedPiece.GetPlayerSide(), ChessPieceContainer, playSquare);
-        System.out.println("King ");
-        break;
     }
     SelectedCoordinatesList = coordinatesList;
     if (copiedPiece.GetSymbol() != 'K') {
@@ -284,51 +280,6 @@ public class ChessFrame extends JFrame {
     coordinatesList = copiedPawn.PawnSpecialMove(x, y, ChessPieceContainer);
 
     return coordinatesList;
-  }
-
-  public ArrayList<int[]> ModifyKingMovement(char playerSide, ChessPiece[] ChessPieceContainer, JPanel[][] playSqaure) {
-    ArrayList<int[]> opponentsMoves = new ArrayList<>();
-    ArrayList<int[]> KingMoves = new ArrayList<>();
-
-    // Adds all of their moves to an ArrayList
-    for (int i = 0; i < 32; i++) {
-      if (ChessPieceContainer[i].GetSymbol() == 'K' &&
-          ChessPieceContainer[i].GetPlayerSide() == playerSide) {
-        // If this is our king
-        KingMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
-            ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
-      } else if (ChessPieceContainer[i].IsAlive() &&
-          ChessPieceContainer[i].GetPlayerSide() != playerSide) {
-        // If the opponent's chess piece is alive
-        ArrayList<int[]> tempMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
-            ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
-        for (int[] moves : tempMoves) {
-          int x = moves[0];
-          int y = moves[1];
-          opponentsMoves.add(new int[] { x, y });
-        }
-      }
-    }
-    ArrayList<int[]> AvailableMoves = new ArrayList<>();
-    for (int[] moves : KingMoves) {
-      int kingX = moves[0];
-      int kingY = moves[1];
-
-      boolean shouldAdd = true;
-
-      // Remove all the moves that would put it in check
-      for (int[] theirMoves : opponentsMoves) {
-        int theirX = theirMoves[0];
-        int theirY = theirMoves[1];
-        if (kingX == theirX && kingY == theirY) {
-          // Move shouldnt be added to the available moves arr
-          shouldAdd = false;
-        }
-      }
-      if (shouldAdd == true)
-        AvailableMoves.add(new int[] { kingX, kingY });
-    }
-    return AvailableMoves;
   }
 
   // ------------ Move Functions ------------ //
