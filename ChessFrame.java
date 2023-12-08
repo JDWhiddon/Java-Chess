@@ -386,7 +386,7 @@ public class ChessFrame extends JFrame {
     if (winner == 'W') {
       winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/WKing.png"));
     } else {
-      winnerIcon = new ImageIcon(ChessFrame.class.getResource("ResourcesBKing.png"));
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/BKing.png"));
     }
     JLabel no = new JLabel("Quit");
     String[] YesOrNo = { "Play again", "Quit" };
@@ -508,21 +508,27 @@ public class ChessFrame extends JFrame {
 
   public boolean CheckForCheckMates(char playerSide) {
     for (int i = 0; i < 32; i++) {
-      if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
+      if (ChessPieceContainer[i].GetPlayerSide() == playerSide && ChessPieceContainer[i].IsAlive()) {
         int tempX = ChessPieceContainer[i].GetXCoord();
         int tempY = ChessPieceContainer[i].GetYCoord();
+        copiedPiece = ChessPieceContainer[i];
         ArrayList<int[]> TempReturnMoves = CheckForMates(
             ChessPieceContainer[i].ValidMoves(tempX, tempY, ChessPieceContainer, numPieces),
             ChessPieceContainer[i].GetPlayerSide(), ChessPieceContainer,
             ChessPieceContainer[i], 0);
         if (TempReturnMoves.size() > 0) {
-          System.out.println(playerSide + " King is not in checkmate");
           return false;
         }
       }
 
     }
     System.out.println(playerSide + " King is IN CHECKMATE");
+    if (playerSide == 'B') {
+      playerSide = 'W';
+    } else {
+      playerSide = 'B';
+    }
+    PrintWinnerDialog(playerSide);
     return true;
   }
 
@@ -573,27 +579,27 @@ public class ChessFrame extends JFrame {
       ChessPiece[] tempBoard = new ChessPiece[32];
       // Sets up a copy of the real board to a container called tempBoard
       for (int i = 0; i < 32; i++) {
-        char symbol = ChessPieceContainer[i].GetSymbol();
-        char side = ChessPieceContainer[i].GetPlayerSide();
+        char symbol = realBoard[i].GetSymbol();
+        char side = realBoard[i].GetPlayerSide();
         JLabel chessPieceLabel;
         switch (symbol) {
           case 'K':
-            tempBoard[i] = new King(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i] = new King(realBoard[i].GetXCoord(), realBoard[i].GetYCoord(), side);
             break;
           case 'Q':
-            tempBoard[i] = new Queen(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i] = new Queen(realBoard[i].GetXCoord(), realBoard[i].GetYCoord(), side);
             break;
           case 'N':
-            tempBoard[i] = new Knight(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i] = new Knight(realBoard[i].GetXCoord(), realBoard[i].GetYCoord(), side);
             break;
           case 'R':
-            tempBoard[i] = new Rook(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i] = new Rook(realBoard[i].GetXCoord(), realBoard[i].GetYCoord(), side);
             break;
           case 'B':
-            tempBoard[i] = new Bishop(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i] = new Bishop(realBoard[i].GetXCoord(), realBoard[i].GetYCoord(), side);
             break;
           case 'P':
-            tempBoard[i] = new Pawn(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i] = new Pawn(realBoard[i].GetXCoord(), realBoard[i].GetYCoord(), side);
             tempBoard[i].SetSymbol('t');
             break;
         }
