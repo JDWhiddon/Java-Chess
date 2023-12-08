@@ -315,8 +315,8 @@ public class ChessFrame extends JFrame {
     if (piece.GetSymbol() == 'P') {
       // Special cases
       // EnPassant(x, y, newX, newY);
-      // piece.SetYCoord(newY);
-      // piece.SetXCoord(newX);
+      piece.SetYCoord(newY);
+      piece.SetXCoord(newX);
       CheckForPromotion(newX, newY);
     }
     return canMove;
@@ -348,6 +348,7 @@ public class ChessFrame extends JFrame {
   }
 
   public void CheckForPromotion(int x, int y) {
+    System.out.println("We are looking for X: " + x + " Y: " + y);
     // If a pawn is on the bottom row, show white promotion box
     ImageIcon queen = new ImageIcon();
     ImageIcon knight = new ImageIcon();
@@ -376,8 +377,13 @@ public class ChessFrame extends JFrame {
         n = 0;
       int index = -1;
       for (int i = 0; i < numPieces; i++) {
+        if (ChessPieceContainer[i].GetSymbol() == 'P') {
+          System.out
+              .println("Pawn X: " + ChessPieceContainer[i].GetXCoord() + " Y: " + ChessPieceContainer[i].GetYCoord());
+        }
         if (ChessPieceContainer[i].GetXCoord() == x && ChessPieceContainer[i].GetYCoord() == y
-            && ChessPieceContainer[i].IsAlive()) {
+            && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetSymbol() == 'P') {
+          System.out.println("index + " + i);
           index = i;
           break;
         }
@@ -400,9 +406,9 @@ public class ChessFrame extends JFrame {
           break;
         default:
           break;
-
       }
     }
+
   }
 
   public void EnPassant(int x, int y, int newX, int newY) {
