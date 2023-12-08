@@ -329,11 +329,10 @@ public class ChessFrame extends JFrame {
     } else {
       winnerIcon = new ImageIcon(ChessFrame.class.getResource("ResourcesBKing.png"));
     }
-    JLabel yes = new JLabel("Play again");
     JLabel no = new JLabel("Quit");
     String[] YesOrNo = { "Play again", "Quit" };
     int n = JOptionPane.showOptionDialog(this, "You won! Congratulations!",
-        "Cgheck", JOptionPane.YES_NO_OPTION,
+        "CheckMate!", JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE, winnerIcon, YesOrNo, no);
     if (n == -1)
       n = 1;
@@ -348,7 +347,6 @@ public class ChessFrame extends JFrame {
   }
 
   public void CheckForPromotion(int x, int y) {
-    System.out.println("We are looking for X: " + x + " Y: " + y);
     // If a pawn is on the bottom row, show white promotion box
     ImageIcon queen = new ImageIcon();
     ImageIcon knight = new ImageIcon();
@@ -378,12 +376,9 @@ public class ChessFrame extends JFrame {
       int index = -1;
       for (int i = 0; i < numPieces; i++) {
         if (ChessPieceContainer[i].GetSymbol() == 'P') {
-          System.out
-              .println("Pawn X: " + ChessPieceContainer[i].GetXCoord() + " Y: " + ChessPieceContainer[i].GetYCoord());
         }
         if (ChessPieceContainer[i].GetXCoord() == x && ChessPieceContainer[i].GetYCoord() == y
             && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetSymbol() == 'P') {
-          System.out.println("index + " + i);
           index = i;
           break;
         }
@@ -458,7 +453,6 @@ public class ChessFrame extends JFrame {
               ChessPieceContainer[i].GetPlayerSide(), realBoard,
               ChessPieceContainer[i], 0);
           if (TempReturnMoves.size() > 0) {
-            System.out.println("Size: " + TempReturnMoves.size());
             canMove = true;
           }
         }
