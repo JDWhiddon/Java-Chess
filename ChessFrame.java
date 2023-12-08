@@ -59,7 +59,7 @@ public class ChessFrame extends JFrame {
   // Turn Counter
   private int turnCount = 1;
 
-  // ---------------- Methods ---------------- //
+  // -------- Methods -------- //
 
   public ChessFrame() {
     super("Chess by John and Harold");
@@ -68,8 +68,7 @@ public class ChessFrame extends JFrame {
     setLayout(chessBoard);
     CreateBoard();
   }
-	
-	// ------------ Board Methods ------------ //
+
   // Sets up the board and places all of the pieces
   public void CreateBoard() {
     MouseHandler handler = new MouseHandler();
@@ -94,34 +93,6 @@ public class ChessFrame extends JFrame {
     DefaultGameSetup(ChessPieceContainer);
     // TestGameSetup();
   }
-	
-  // Needed to update the board after a piece is moved
-  public void UpdatePieces() {
-    // Reset all current JPanels
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        playSquare[i][j].removeAll();
-        playSquare[i][j].repaint();
-      }
-    }
-
-    // May add an if statement to detect if a piece is captured or not to not draw
-    // it on the board
-    for (int i = 0; i < numPieces; i++) {
-      if (ChessPieceContainer[i].IsAlive()) {
-        int xCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetXCoord(), 'X');
-        int yCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetYCoord(), 'Y');
-        playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
-      }
-    }
-
-    // Update any changes
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        playSquare[i][j].validate();
-      }
-    }
-  }
 
   // To reset the JPanel Backgrounds
   private void ResetBoardBackground() {
@@ -134,12 +105,6 @@ public class ChessFrame extends JFrame {
         else
           playSquare[i][j].setBackground(green);
       }
-    }
-    // Changes the background to red if the king is in check
-    ArrayList<int[]> tempMoves = new ArrayList<>();
-
-    if (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer)) {
-      CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
     }
   }
 
@@ -184,7 +149,6 @@ public class ChessFrame extends JFrame {
      * A PlacePiece function may be added in place
      * An ArrayList may also be used instead of an array
      */
-		turnCount = 1;
     DisplayOnBoard(ChessPieceContainer);
   }
 
@@ -253,8 +217,427 @@ public class ChessFrame extends JFrame {
       playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
     }
   }
-	
-	// Use the built in symbol from a piece object to find the correct image to
+
+  // Designed to be as compatible for different types of selection
+  // selectPiece always generates a new copied piece based on the recent selection
+  // Triggered by clicks
+  public void selectPiece(int x, int y) {
+    // A copiedPiece needs to be passed through several methods without being needed
+    // as a parameter
+    copiedPiece = new NullPiece(1, 1, 'N');
+    int xCoord = TranslatePieceCoordinates(x, 'X');
+    int yCoord = TranslatePieceCoordinates(y, 'Y');
+    for (int i = 0; i < numPieces; i++) {
+      if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()
+          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetMoveableStatus() == true) {
+        copiedPiece = ChessPieceContainer[i];
+        isSelected = true;
+        ShowValidMoves(copiedPiece);
+      }
+    }
+  }
+
+  // Displays the valid moves on the board
+  // Triggered by clicks
+  public ArrayList<int[]> ShowValidMoves(ChessPiece selectedPiece) {
+    int pivotxCoord = copiedPiece.GetXCoord();
+    int pivotyCoord = copiedPiece.GetYCoord();
+    boolean overrideValidMove = false;
+    ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(pivotxCoord, pivotyCoord, ChessPieceContainer);
+
+    // Resets the background of each square, so that the moves reset when
+    // deselecting a piece
+
+    ResetBoardBackground();
+
+    // ---- Piece Selection ---- //
+    // From java.lang.Class<T>, using .getClass().getName()
+    switch (copiedPiece.getClass().getName()) {
+      case "Pawn":
+        coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
+        System.out.println("Pawn ");
+        break;
+    }
+    SelectedCoordinatesList = coordinatesList;
+    if (copiedPiece.GetSymbol() != 'K') {
+      SelectedCoordinatesList = CheckForMates(coordinatesList,
+          copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
+    } else {
+      SelectedCoordinatesList = coordinatesList;
+    }
+
+    for (int[] coordinates : SelectedCoordinatesList) {
+      playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
+    }
+    return SelectedCoordinatesList;
+  }
+
+  // -------- Valid Move Helper Functions -------- //
+  // Shows valid pawn movement based on the posmakemoveition of other pieces
+  // May integrate into the pawn class if possible
+  public ArrayList<int[]> ModifyPawnMovement(int x, int y) {
+    // To access pawn only methods
+    Pawn copiedPawn = (Pawn) copiedPiece;
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+
+    coordinatesList = copiedPawn.PawnSpecialMove(x, y, ChessPieceContainer);
+
+    return coordinatesList;
+  }
+
+  // ------------ Move Functions ------------ //
+  public void MakeMove(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
+
+    if (MoveValidator(x, y, newX, newY, board, piece) == true) {
+      piece.SetMoveStatus(true);
+      piece.SetYCoord(newY);
+      piece.SetXCoord(newX);
+    }
+    UpdatePieces();
+  }
+
+  // -------- Move Helper Functions -------- //
+  // Determines an action for a move
+  private boolean MoveValidator(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
+    boolean canMove = true;
+    for (int i = 0; i < numPieces; i++) {
+      // Checks to see if the piece moved on top of another, and removes it if so
+      if (board[i].GetXCoord() == newX && board[i].GetYCoord() == newY && board[i].IsAlive()) {
+        if (board[i].GetPlayerSide() != piece.GetPlayerSide()) {
+          board[i].RemovePiece();
+          System.out.println("Piece taken!");
+        } else {
+          canMove = false;
+        }
+      }
+    }
+
+    if (piece.GetSymbol() == 'P') {
+      // Special cases
+      // EnPassant(x, y, newX, newY);
+      // piece.SetYCoord(newY);
+      // piece.SetXCoord(newX);
+      CheckForPromotion(newX, newY);
+    }
+    return canMove;
+  }
+
+  public void PrintWinnerDialog(char winner) {
+    ImageIcon winnerIcon = new ImageIcon();
+    if (winner == 'W') {
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/WKing.png"));
+    } else {
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("ResourcesBKing.png"));
+    }
+    JLabel yes = new JLabel("Play again");
+    JLabel no = new JLabel("Quit");
+    String[] YesOrNo = { "Play again", "Quit" };
+    int n = JOptionPane.showOptionDialog(this, "You won! Congratulations!",
+        "Cgheck", JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE, winnerIcon, YesOrNo, no);
+    if (n == -1)
+      n = 1;
+
+    if (n == 1) {
+      System.exit(0);
+    } else {
+      DefaultGameSetup(ChessPieceContainer);
+      UpdatePieces();
+    }
+
+  }
+
+  public void CheckForPromotion(int x, int y) {
+    // If a pawn is on the bottom row, show white promotion box
+    ImageIcon queen = new ImageIcon();
+    ImageIcon knight = new ImageIcon();
+    ImageIcon bishop = new ImageIcon();
+    ImageIcon rook = new ImageIcon();
+    if (y == 8) {
+      queen = new ImageIcon(ChessFrame.class.getResource("Resources/WQueen.png"));
+      knight = new ImageIcon(ChessFrame.class.getResource("Resources/WKnight.png"));
+      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/WBishop.png"));
+      rook = new ImageIcon(ChessFrame.class.getResource("Resources/WRook.png"));
+    }
+    // If a pawn in on the top row, show black promotion box
+    else if (y == 1) {
+      queen = new ImageIcon(ChessFrame.class.getResource("Resources/BQueen.png"));
+      knight = new ImageIcon(ChessFrame.class.getResource("Resources/BKnight.png"));
+      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/BBishop.png"));
+      rook = new ImageIcon(ChessFrame.class.getResource("Resources/BRook.png"));
+    }
+    if (y == 1 || y == 8) {
+      Object[] promotionOptions = { queen, knight, bishop, rook };
+      int n = JOptionPane.showOptionDialog(this, "You got promoted! Choose a piece to change your pawn to.",
+          "Pawn promotion", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE, null, promotionOptions, queen);
+      // If the user closes out of the window without picking, choose queen
+      if (n == -1)
+        n = 0;
+      int index = -1;
+      for (int i = 0; i < numPieces; i++) {
+        if (ChessPieceContainer[i].GetXCoord() == x && ChessPieceContainer[i].GetYCoord() == y
+            && ChessPieceContainer[i].IsAlive()) {
+          index = i;
+          break;
+        }
+      }
+      // Remove the old pawn
+      ChessPieceContainer[index].RemovePiece();
+      switch (n) {
+        // Queen
+        case 0:
+          ChessPieceContainer[index] = new Queen(x, y, copiedPiece.GetPlayerSide());
+          break;
+        case 1:
+          ChessPieceContainer[index] = new Knight(x, y, copiedPiece.GetPlayerSide());
+          break;
+        case 2:
+          ChessPieceContainer[index] = new Bishop(x, y, copiedPiece.GetPlayerSide());
+          break;
+        case 3:
+          ChessPieceContainer[index] = new Rook(x, y, copiedPiece.GetPlayerSide());
+          break;
+        default:
+          break;
+
+      }
+    }
+  }
+
+  public void EnPassant(int x, int y, int newX, int newY) {
+    /*
+     * // To access pawn only methods
+     * Pawn copiedPawn = (Pawn) copiedPiece;
+     * 
+     * // If a pawn has moved twice
+     * if ((copiedPawn.GetYCoord() == 2 && newY == 4) || (copiedPawn.GetYCoord() ==
+     * 7 && newY == 5)) {
+     * copiedPawn.MoveTwice(true);
+     * }
+     * 
+     * for (int i = 0; i < numPieces; i++) {
+     * // En Passant Right
+     * if (ChessPieceContainer[i].GetXCoord() == (x + 1) &&
+     * ChessPieceContainer[i].GetYCoord() == (y)
+     * && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice()
+     * == true) {
+     * if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
+     * ChessPieceContainer[i].RemovePiece();
+     * System.out.println("Piece taken!");
+     * }
+     * // En Passant left
+     * } else if (ChessPieceContainer[i].GetXCoord() == (x - 1) &&
+     * ChessPieceContainer[i].GetYCoord() == (y)
+     * && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice()
+     * == true) {
+     * if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
+     * ChessPieceContainer[i].RemovePiece();
+     * System.out.println("Piece taken!");
+     * }
+     * }
+     * }
+     */
+  }
+
+  public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
+      ChessPiece[] realBoard, ChessPiece selectedPiece, int RecursiveCall) {
+    if (RecursiveCall == 1 && (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer))) {
+      boolean canMove = false;
+      for (int i = 0; i < 32; i++) {
+        if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
+          int tempX = ChessPieceContainer[i].GetXCoord();
+          int tempY = ChessPieceContainer[i].GetYCoord();
+          ArrayList<int[]> TempReturnMoves = CheckForMates(ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard),
+              ChessPieceContainer[i].GetPlayerSide(), realBoard,
+              ChessPieceContainer[i], 0);
+          if (TempReturnMoves.size() > 0) {
+            System.out.println("Size: " + TempReturnMoves.size());
+            canMove = true;
+          }
+        }
+      }
+      if (canMove) {
+
+      } else {
+        System.out.println("Checkmate");
+        if (isKingInCheck('W', realBoard))
+          PrintWinnerDialog('B');
+        else
+          PrintWinnerDialog('W');
+      }
+    }
+    // This ArrayList will store all of the moves that WONT put the king in check
+    ArrayList<int[]> ReturnMoves = new ArrayList<>();
+    int kingX = 0;
+    int kingY = 0;
+    // Finds our king
+    for (int i = 0; i < 32; i++) {
+      if (realBoard[i].GetSymbol() == 'K' && realBoard[i].GetPlayerSide() == playerSide) {
+        // If this is our king
+        kingX = realBoard[i].GetXCoord();
+        kingY = realBoard[i].GetYCoord();
+      }
+    }
+    // Check to see if making the move would put our king in check
+    for (int[] move : coordinatesList) {
+      int x = move[0];
+      int y = move[1];
+      ChessPiece[] tempBoard = new ChessPiece[32];
+      // Sets up a copy of the real board to a container called tempBoard
+      for (int i = 0; i < 32; i++) {
+        char symbol = ChessPieceContainer[i].GetSymbol();
+        char side = ChessPieceContainer[i].GetPlayerSide();
+        JLabel chessPieceLabel;
+        switch (symbol) {
+          case 'K':
+            tempBoard[i] = new King(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            break;
+          case 'Q':
+            tempBoard[i] = new Queen(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            break;
+          case 'N':
+            tempBoard[i] = new Knight(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            break;
+          case 'R':
+            tempBoard[i] = new Rook(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            break;
+          case 'B':
+            tempBoard[i] = new Bishop(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            break;
+          case 'P':
+            tempBoard[i] = new Pawn(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
+            tempBoard[i].SetSymbol('t');
+            break;
+        }
+      }
+
+      for (int i = 0; i < 32; i++) {
+        tempBoard[i].SetXCoord(ChessPieceContainer[i].GetXCoord());
+        tempBoard[i].SetYCoord(ChessPieceContainer[i].GetYCoord());
+      }
+      int tempPiece = returnNewCopiedPiece(tempBoard);
+
+      // tempBoard[tempPiece].SetXCoord(x);
+      // tempBoard[tempPiece].SetYCoord(y);
+      MakeMove(tempBoard[tempPiece].GetXCoord(), tempBoard[tempPiece].GetYCoord(), x, y, tempBoard,
+          tempBoard[tempPiece]);
+      if (!isKingInCheck(playerSide, tempBoard)) {
+        ReturnMoves.add(new int[] { x, y });
+      }
+    }
+    for (int[] xy : ReturnMoves) {
+      int x = xy[0];
+      int y = xy[1];
+    }
+    return ReturnMoves;
+  }
+
+  public int returnNewCopiedPiece(ChessPiece[] tempBoard) {
+    for (int i = 0; i < numPieces; i++) {
+      if (copiedPiece.GetXCoord() == tempBoard[i].GetXCoord() && copiedPiece.GetYCoord() == tempBoard[i].GetYCoord())
+        return i;
+    }
+    return 0;
+  }
+
+  public boolean isKingInCheck(char playerSide, ChessPiece[] board) {
+    // Adds all of their moves to an ArrayList
+    int kingX = 0;
+    int kingY = 0;
+    for (int i = 0; i < 32; i++) {
+      if (ChessPieceContainer[i].GetPlayerSide() == playerSide && ChessPieceContainer[i].GetSymbol() == 'K') {
+        kingX = ChessPieceContainer[i].GetXCoord();
+        kingY = ChessPieceContainer[i].GetYCoord();
+      }
+    }
+    ArrayList<int[]> opponentsMoves = new ArrayList<>();
+    for (int i = 0; i < 32; i++) {
+      if (board[i].IsAlive() &&
+          board[i].GetPlayerSide() != playerSide) {
+        // If the opponent's chess piece is alive
+        ArrayList<int[]> tempMoves = board[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
+            board[i].GetYCoord(), board);
+        for (int[] moves : tempMoves) {
+          int x = moves[0];
+          int y = moves[1];
+          opponentsMoves.add(new int[] { x, y });
+        }
+      }
+    }
+    for (int[] theirMoves : opponentsMoves) {
+      int theirX = theirMoves[0];
+      int theirY = theirMoves[1];
+      if (kingX == theirX && kingY == theirY) {
+        // Move shouldnt be added to the available moves arr
+        playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
+        UpdatePieces();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Needed to update the board after a piece is moved
+  public void UpdatePieces() {
+    // Reset all current JPanels
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        playSquare[i][j].removeAll();
+        playSquare[i][j].repaint();
+      }
+    }
+
+    // May add an if statement to detect if a piece is captured or not to not draw
+    // it on the board
+    for (int i = 0; i < numPieces; i++) {
+      if (ChessPieceContainer[i].IsAlive()) {
+        int xCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetXCoord(), 'X');
+        int yCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetYCoord(), 'Y');
+        playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
+      }
+    }
+
+    // Update any changes
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        playSquare[i][j].validate();
+      }
+    }
+  }
+
+  // From piece coordinates to the playSquare 2D array
+  private int TranslatePieceCoordinates(int coord, char direction) {
+    // Non-flipped
+    if (direction == 'X') {
+      // Shift the coordinate down by one to fit in the 2D array
+      int translatedXCoord = (coord - 1);
+      coord = translatedXCoord;
+    } else if (direction == 'Y') {
+      // Shift the coordinate down by one to fit in the 2D array
+      int translatedYCoord = (coord - 1);
+      // Flip the coordinate to ensure untranslated y value 1 starts at the bottom
+      coord = (7 - translatedYCoord);
+    }
+    return coord;
+  }
+
+  // From playSquare 2D array to piece coordinates
+  private int TranslateBoardCoordinates(int coord, char direction) {
+    // Non-flipped
+    if (direction == 'X') {
+      // Shift the coordinate up by one to fit in the 2D array
+      int translatedXCoord = (coord + 1);
+      coord = translatedXCoord;
+    } else if (direction == 'Y') {
+      int translatedYCoord = coord;
+      // Flip the coordinate to ensure translated y value 1 starts at the top
+      coord = (8 - translatedYCoord);
+    }
+    return coord;
+  }
+
+  // Use the built in symbol from a piece object to find the correct image to
   // represent that piece
   private JLabel SymbolToLabel(ChessPiece selectedPiece) {
     char symbol = selectedPiece.GetSymbol();
@@ -309,401 +692,6 @@ public class ChessFrame extends JFrame {
     return chessPieceLabel;
   }
 
-	// ------------ Selection ------------ //
-  // Designed to be as compatible for different types of selection
-  // selectPiece always generates a new copied piece based on the recent selection
-  // Triggered by clicks
-  public void selectPiece(int x, int y) {
-    // A copiedPiece needs to be passed through several methods without being needed
-    // as a parameter
-    copiedPiece = new NullPiece(1, 1, 'N');
-    int xCoord = TranslatePieceCoordinates(x, 'X');
-    int yCoord = TranslatePieceCoordinates(y, 'Y');
-    for (int i = 0; i < numPieces; i++) {
-      if (x == ChessPieceContainer[i].GetXCoord() && y == ChessPieceContainer[i].GetYCoord()
-          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetMoveableStatus() == true) {
-        copiedPiece = ChessPieceContainer[i];
-        isSelected = true;
-        ShowValidMoves(copiedPiece);
-      }
-    }
-  }
-
-  // Displays the valid moves on the board
-  // Triggered by clicks
-  public ArrayList<int[]> ShowValidMoves(ChessPiece selectedPiece) {
-    int pivotxCoord = copiedPiece.GetXCoord();
-    int pivotyCoord = copiedPiece.GetYCoord();
-    boolean overrideValidMove = false;
-    ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(pivotxCoord, pivotyCoord, ChessPieceContainer);
-
-    // Resets the background of each square, so that the moves reset when
-    // deselecting a piece
-
-    ResetBoardBackground();
-
-    // If the piece is a pawn:
-    // From java.lang.Class<T>, using .getClass().getName()
-    switch (copiedPiece.getClass().getName()) {
-      case "Pawn":
-        coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
-        System.out.println("Pawn ");
-        break;
-    }
-    SelectedCoordinatesList = coordinatesList;
-    if (copiedPiece.GetSymbol() != 'K') {
-      SelectedCoordinatesList = CheckForMates(coordinatesList,
-          copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
-    } else {
-      SelectedCoordinatesList = coordinatesList;
-    }
-
-    for (int[] coordinates : SelectedCoordinatesList) {
-      playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
-    }
-    return SelectedCoordinatesList;
-  }
-
-  // -------- Valid Move Display Helper Functions -------- //
-  // Shows valid pawn movement based on the posmakemoveition of other pieces
-  // May integrate into the pawn class if possible
-  public ArrayList<int[]> ModifyPawnMovement(int x, int y) {
-    // To access pawn only methods
-    Pawn copiedPawn = (Pawn) copiedPiece;
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-
-    coordinatesList = copiedPawn.PawnSpecialMove(x, y, ChessPieceContainer);
-
-    return coordinatesList;
-  }
-
-  // ------------ Move Functions ------------ //
-  public void MakeMove(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
-
-    if (MoveValidator(x, y, newX, newY, board, piece) == true) {
-      piece.SetMoveStatus(true);
-      piece.SetYCoord(newY);
-      piece.SetXCoord(newX);
-    }
-    UpdatePieces();
-  }
-
-  // -------- Move Helper Functions -------- //
-  // Determines an action for a move
-  private boolean MoveValidator(int x, int y, int newX, int newY, ChessPiece[] board, ChessPiece piece) {
-    boolean canMove = true;
-    for (int i = 0; i < numPieces; i++) {
-      // Checks to see if the piece moved on top of another, and removes it if so
-      if (board[i].GetXCoord() == newX && board[i].GetYCoord() == newY && board[i].IsAlive()) {
-        if (board[i].GetPlayerSide() != piece.GetPlayerSide()) {
-          board[i].RemovePiece();
-          System.out.println("Piece taken!");
-        } else {
-          canMove = false;
-        }
-      }
-    }
-
-    if (piece.GetSymbol() == 'P') {
-      // Special cases
-      // EnPassant(x, y, newX, newY);
-      // piece.SetYCoord(newY);
-      // piece.SetXCoord(newX);
-      CheckForPromotion(newX, newY, piece);
-    }
-    return canMove;
-  }
-
-  public void PrintWinnerDialog(char winner) {
-    ImageIcon winnerIcon = new ImageIcon();
-    if (winner == 'W') {
-      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/WKing.png"));
-    } else {
-      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/BKing.png"));
-    }
-    JLabel yes = new JLabel("Play again");
-    JLabel no = new JLabel("Quit");
-    String[] YesOrNo = { "Play again", "Quit" };
-    int n = JOptionPane.showOptionDialog(this, "You won! Congratulations!",
-        "Cgheck", JOptionPane.YES_NO_OPTION,
-        JOptionPane.QUESTION_MESSAGE, winnerIcon, YesOrNo, no);
-    if (n == -1)
-      n = 1;
-
-    if (n == 1) {
-      System.exit(0);
-    } else {
-      DefaultGameSetup(ChessPieceContainer);
-      UpdatePieces();
-    }
-
-  }
-
-  public void CheckForPromotion(int x, int y, ChessPiece piece) {
-    // If a pawn is on the bottom row, show white promotion box
-    ImageIcon queen = new ImageIcon();
-    ImageIcon knight = new ImageIcon();
-    ImageIcon bishop = new ImageIcon();
-    ImageIcon rook = new ImageIcon();
-    if (y == 8) {
-      queen = new ImageIcon(ChessFrame.class.getResource("Resources/WQueen.png"));
-      knight = new ImageIcon(ChessFrame.class.getResource("Resources/WKnight.png"));
-      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/WBishop.png"));
-      rook = new ImageIcon(ChessFrame.class.getResource("Resources/WRook.png"));
-    }
-    // If a pawn in on the top row, show black promotion box
-    else if (y == 1) {
-      queen = new ImageIcon(ChessFrame.class.getResource("Resources/BQueen.png"));
-      knight = new ImageIcon(ChessFrame.class.getResource("Resources/BKnight.png"));
-      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/BBishop.png"));
-      rook = new ImageIcon(ChessFrame.class.getResource("Resources/BRook.png"));
-    }
-    if (y == 1 || y == 8) {
-      Object[] promotionOptions = { queen, knight, bishop, rook };
-      int n = JOptionPane.showOptionDialog(this, "You got promoted! Choose a piece to change your pawn to.",
-          "Pawn promotion", JOptionPane.YES_NO_OPTION,
-          JOptionPane.QUESTION_MESSAGE, null, promotionOptions, queen);
-      // If the user closes out of the window without picking, choose queen
-      if (n == -1)
-        n = 0;
-      int index = -1;
-      for (int i = 0; i < numPieces; i++) {
-        if (ChessPieceContainer[i].GetXCoord() == piece.GetXCoord() && ChessPieceContainer[i].GetYCoord() == piece.GetYCoord()
-            && ChessPieceContainer[i].IsAlive()) {
-          index = i;
-        }
-      }
-			System.out.println("n: " + n);
-			if(index > -1){
-				// Remove the old pawn
-				ChessPieceContainer[index].RemovePiece();
-				switch (n) {
-					// Queen
-					case 0:
-						ChessPieceContainer[index] = new Queen(x, y, copiedPiece.GetPlayerSide());
-						break;
-					case 1:
-						ChessPieceContainer[index] = new Knight(x, y, copiedPiece.GetPlayerSide());
-						break;
-					case 2:
-						ChessPieceContainer[index] = new Bishop(x, y, copiedPiece.GetPlayerSide());
-						break;
-					case 3:
-						ChessPieceContainer[index] = new Rook(x, y, copiedPiece.GetPlayerSide());
-						break;
-					default:
-						break;
-				}
-				
-			}
-    }
-  }
-
-  public void EnPassant(int x, int y, int newX, int newY) {
-    /*
-     * // To access pawn only methods
-     * Pawn copiedPawn = (Pawn) copiedPiece;
-     * 
-     * // If a pawn has moved twice
-     * if ((copiedPawn.GetYCoord() == 2 && newY == 4) || (copiedPawn.GetYCoord() ==
-     * 7 && newY == 5)) {
-     * copiedPawn.MoveTwice(true);
-     * }
-     * 
-     * for (int i = 0; i < numPieces; i++) {
-     * // En Passant Right
-     * if (ChessPieceContainer[i].GetXCoord() == (x + 1) &&
-     * ChessPieceContainer[i].GetYCoord() == (y)
-     * && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice()
-     * == true) {
-     * if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
-     * ChessPieceContainer[i].RemovePiece();
-     * System.out.println("Piece taken!");
-     * }
-     * // En Passant left
-     * } else if (ChessPieceContainer[i].GetXCoord() == (x - 1) &&
-     * ChessPieceContainer[i].GetYCoord() == (y)
-     * && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice()
-     * == true) {
-     * if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
-     * ChessPieceContainer[i].RemovePiece();
-     * System.out.println("Piece taken!");
-     * }
-     * }
-     * }
-     */
-  }
-
-  public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
-      ChessPiece[] realBoard, ChessPiece selectedPiece, int RecursiveCall) {
-
-    if (RecursiveCall == 1 && (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer))) {
-      boolean canMove = true;
-      for (int i = 0; i < numPieces; i++) {
-        if (ChessPieceContainer[i].GetPlayerSide() != playerSide) {
-          int tempX = ChessPieceContainer[i].GetXCoord();
-          int tempY = ChessPieceContainer[i].GetYCoord();
-          ArrayList<int[]> TempReturnMoves = CheckForMates(ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard),
-              playerSide, realBoard,
-              selectedPiece, 0);
-          if (TempReturnMoves.size() > 0) {
-            canMove = false;
-            if (isKingInCheck('W', realBoard))
-              PrintWinnerDialog('B');
-            else
-              PrintWinnerDialog('W');
-
-            break;
-          }
-        }
-      }
-      if (!canMove) {
-      }
-    }
-    // This ArrayList will store all of the moves that WONT put the king in check
-    ArrayList<int[]> ReturnMoves = new ArrayList<>();
-    int kingX = 0;
-    int kingY = 0;
-    // Finds our king
-    for (int i = 0; i < numPieces; i++) {
-      if (realBoard[i].GetSymbol() == 'K' && realBoard[i].GetPlayerSide() == playerSide) {
-        // If this is our king
-        kingX = realBoard[i].GetXCoord();
-        kingY = realBoard[i].GetYCoord();
-      }
-    }
-    // Check to see if making the move would put our king in check
-    for (int[] move : coordinatesList) {
-      int x = move[0];
-      int y = move[1];
-      ChessPiece[] tempBoard = new ChessPiece[numPieces];
-      // Sets up a copy of the real board to a container called tempBoard
-      for (int i = 0; i < numPieces; i++) {
-        char symbol = ChessPieceContainer[i].GetSymbol();
-        char side = ChessPieceContainer[i].GetPlayerSide();
-        JLabel chessPieceLabel;
-        switch (symbol) {
-          case 'K':
-            tempBoard[i] = new King(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
-            break;
-          case 'Q':
-            tempBoard[i] = new Queen(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
-            break;
-          case 'N':
-            tempBoard[i] = new Knight(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
-            break;
-          case 'R':
-            tempBoard[i] = new Rook(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
-            break;
-          case 'B':
-            tempBoard[i] = new Bishop(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
-            break;
-          case 'P':
-            tempBoard[i] = new Pawn(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(), side);
-            tempBoard[i].SetSymbol('t');
-            break;
-        }
-      }
-
-      for (int i = 0; i < numPieces; i++) {
-        tempBoard[i].SetXCoord(ChessPieceContainer[i].GetXCoord());
-        tempBoard[i].SetYCoord(ChessPieceContainer[i].GetYCoord());
-      }
-      int tempPiece = returnNewCopiedPiece(tempBoard);
-
-      // tempBoard[tempPiece].SetXCoord(x);
-      // tempBoard[tempPiece].SetYCoord(y);
-      MakeMove(tempBoard[tempPiece].GetXCoord(), tempBoard[tempPiece].GetYCoord(), x, y, tempBoard,
-          tempBoard[tempPiece]);
-      if (!isKingInCheck(playerSide, tempBoard)) {
-        ReturnMoves.add(new int[] { x, y });
-      }
-    }
-    for (int[] xy : ReturnMoves) {
-      int x = xy[0];
-      int y = xy[1];
-    }
-    return ReturnMoves;
-  }
-
-  public int returnNewCopiedPiece(ChessPiece[] tempBoard) {
-    for (int i = 0; i < numPieces; i++) {
-      if (copiedPiece.GetXCoord() == tempBoard[i].GetXCoord() && copiedPiece.GetYCoord() == tempBoard[i].GetYCoord())
-        return i;
-    }
-    return 0;
-  }
-
-  public boolean isKingInCheck(char playerSide, ChessPiece[] board) {
-    // Adds all of their moves to an ArrayList
-    int kingX = 0;
-    int kingY = 0;
-    for (int i = 0; i < numPieces; i++) {
-      if (ChessPieceContainer[i].GetPlayerSide() == playerSide && ChessPieceContainer[i].GetSymbol() == 'K') {
-        kingX = ChessPieceContainer[i].GetXCoord();
-        kingY = ChessPieceContainer[i].GetYCoord();
-      }
-    }
-    ArrayList<int[]> opponentsMoves = new ArrayList<>();
-    for (int i = 0; i < numPieces; i++) {
-      if (board[i].IsAlive() &&
-          board[i].GetPlayerSide() != playerSide) {
-        // If the opponent's chess piece is alive
-        ArrayList<int[]> tempMoves = board[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
-            board[i].GetYCoord(), board);
-        for (int[] moves : tempMoves) {
-          int x = moves[0];
-          int y = moves[1];
-          opponentsMoves.add(new int[] { x, y });
-        }
-      }
-    }
-    for (int[] theirMoves : opponentsMoves) {
-      int theirX = theirMoves[0];
-      int theirY = theirMoves[1];
-      if (kingX == theirX && kingY == theirY) {
-        // Move shouldnt be added to the available moves arr
-        playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
-        UpdatePieces();
-        return true;
-      }
-    }
-    return false;
-  }
-
-	// ------------ Coordinate Translation ------------ //
-  // From piece coordinates to the playSquare 2D array
-  private int TranslatePieceCoordinates(int coord, char direction) {
-    // Non-flipped
-    if (direction == 'X') {
-      // Shift the coordinate down by one to fit in the 2D array
-      int translatedXCoord = (coord - 1);
-      coord = translatedXCoord;
-    } else if (direction == 'Y') {
-      // Shift the coordinate down by one to fit in the 2D array
-      int translatedYCoord = (coord - 1);
-      // Flip the coordinate to ensure untranslated y value 1 starts at the bottom
-      coord = (7 - translatedYCoord);
-    }
-    return coord;
-  }
-
-  // From playSquare 2D array to piece coordinates
-  private int TranslateBoardCoordinates(int coord, char direction) {
-    // Non-flipped
-    if (direction == 'X') {
-      // Shift the coordinate up by one to fit in the 2D array
-      int translatedXCoord = (coord + 1);
-      coord = translatedXCoord;
-    } else if (direction == 'Y') {
-      int translatedYCoord = coord;
-      // Flip the coordinate to ensure translated y value 1 starts at the top
-      coord = (8 - translatedYCoord);
-    }
-    return coord;
-  }
-
-	// ------------ MouseHandler ------------ //
   private class MouseHandler implements MouseListener, MouseMotionListener {
     public void mouseDragged(MouseEvent e) {
       // TODO Auto-generated method stub
@@ -758,6 +746,25 @@ public class ChessFrame extends JFrame {
                 }
               }
             }
+      }
+      // Changes the background to red if the king is in check
+      ArrayList<int[]> tempMoves = new ArrayList<>();
+
+      if (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer)) {
+        CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
+        for (int i = 0; i < 32; i++) {
+          if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == 'B') {
+            selectPiece(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetXCoord());
+          }
+        }
+        CheckForMates(tempMoves, 'W', ChessPieceContainer, copiedPiece, 1);
+        for (int i = 0; i < 32; i++) {
+          if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == 'W') {
+            selectPiece(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetXCoord());
+          }
+        }
+        CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
+        CheckForMates(tempMoves, 'W', ChessPieceContainer, copiedPiece, 1);
       }
     }
 
