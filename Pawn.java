@@ -7,8 +7,9 @@ import javax.swing.*;
 public class Pawn extends ChessPiece {
 	private char symbol = 'P';
 	private boolean isBlocked = false;
+	private boolean isBlockedTwice = false;
 	private boolean movedTwice = false;
-	boolean[] choices = new boolean[5];
+	boolean[] choices = new boolean[4];
 	int leftBound = 1;
 	int rightBound = 8;
 	int lowerBound = 1;
@@ -44,20 +45,13 @@ public class Pawn extends ChessPiece {
 				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[2] = true;
 			}
-			/*
-			 * // En Passant right
-			 * if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice()
-			 * == true) {
-			 * choices[3] = true;
-			 * }
-			 * // En Passant left
-			 * if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice()
-			 * == true) {
-			 * choices[4] = true;
-			 * }
-			 */
+			// Front movement (Blocked, two)
+			if (cp.GetXCoord() == x && cp.GetYCoord() == (y + 2)) {
+				choices[3] = true;
+				isBlockedTwice = true;
+			}
 			// ---- Black Side ----
-		} else {
+		} else if (playerSide == 'B' && cp.IsAlive()){
 			// Front movement (Blocked)
 			if (cp.GetXCoord() == x && cp.GetYCoord() == (y - 1)) {
 				choices[0] = true;
@@ -73,18 +67,11 @@ public class Pawn extends ChessPiece {
 				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[2] = true;
 			}
-			/*
-			 * // En Passant right
-			 * if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice()
-			 * == true) {
-			 * choices[3] = true;
-			 * }
-			 * // En Passant left
-			 * if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y) && cp.IsMovedTwice()
-			 * == true) {
-			 * choices[4] = true;
-			 * }
-			 */
+			// Front movement (Blocked, two)
+			if (cp.GetXCoord() == x && cp.GetYCoord() == (y - 2)) {
+				choices[3] = true;
+				isBlockedTwice = true;
+			}
 		}
 
 	}
@@ -103,16 +90,7 @@ public class Pawn extends ChessPiece {
 			if (choices[2] == true && y < upperBound && x > leftBound) {
 				SelectedCoordinatesList.add(new int[] { x - 1, y + 1 });
 			}
-			/*
-			 * // En Passant Right
-			 * if (choices[3] == true && y < upperBound && x < rightBound) {
-			 * SelectedCoordinatesList.add(new int[] { x + 1, y + 1 });
-			 * }
-			 * // En Passant Left
-			 * if (choices[4] == true && y < upperBound && x > leftBound) {
-			 * SelectedCoordinatesList.add(new int[] { x - 1, y + 1 });
-			 * }
-			 */
+			
 		} else {
 			// Diagonal Right Capture
 			if (choices[1] == true && y > lowerBound && x < rightBound) {
@@ -122,19 +100,8 @@ public class Pawn extends ChessPiece {
 			if (choices[2] == true && y > lowerBound && x > leftBound) {
 				SelectedCoordinatesList.add(new int[] { x - 1, y - 1 });
 			}
-			/*
-			 * // En Passant Right
-			 * if (choices[3] == true && y > lowerBound && x < rightBound) {
-			 * SelectedCoordinatesList.add(new int[] { x + 1, y - 1 });
-			 * }
-			 * // En Passant Left
-			 * if (choices[4] == true && y > lowerBound && x > leftBound) {
-			 * SelectedCoordinatesList.add(new int[] { x - 1, y - 1 });
-			 * }
-			 */
+			
 		}
-
-		ResetChoices();
 
 		return SelectedCoordinatesList;
 	}
@@ -146,33 +113,39 @@ public class Pawn extends ChessPiece {
 		for (int i = 0; i < numPieces; i++) {
 			DetectSpecialMove(x, y, copyPieceContainer[i]);
 		}
+		
 		ArrayList<int[]> coordinatesList = PawnSpecialMove(x, y, copyPieceContainer, numPieces);
 		if (playerSide == 'W') {
 			// At start position
-			if (y < upperBound && isBlocked == false) {
+			if (y < upperBound && choices[0] == false) {
 				if (y == 2) {
-					coordinatesList.add(new int[] { x, y + 2 });
+					if(isBlockedTwice == false)
+						coordinatesList.add(new int[] { x, y + 2 });
 					coordinatesList.add(new int[] { x, y + 1 });
 				} else
 					coordinatesList.add(new int[] { x, y + 1 });
 			}
-		} else {
-			if (y > lowerBound && isBlocked == false) {
+		} else if (playerSide == 'B'){
+			if (y > lowerBound && choices[0] == false) {
 				if (y == 7) {
-					coordinatesList.add(new int[] { x, y - 2 });
+					if(isBlockedTwice == false)
+						coordinatesList.add(new int[] { x, y - 2 });
 					coordinatesList.add(new int[] { x, y - 1 });
 				} else
 					coordinatesList.add(new int[] { x, y - 1 });
 			}
 		}
+		
+		ResetChoices();
 		return coordinatesList;
 	}
 
 	public void ResetChoices() {
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 4; i++) {
 			choices[i] = false;
 		}
 		isBlocked = false;
+		isBlockedTwice = false;
 	}
 
 	public boolean IsMovedTwice() {
