@@ -158,6 +158,31 @@ public class ChessFrame extends JFrame {
           playSquare[i][j].setBackground(green);
       }
     }
+    // Find each king and paint the squares red if in check
+    if (isKingInCheck('B', ChessPieceContainer)) {
+      int kingX = 0;
+      int kingY = 0;
+      for (int i = 0; i < numPieces; i++) {
+        if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == 'B') {
+          kingX = ChessPieceContainer[i].GetXCoord();
+          kingY = ChessPieceContainer[i].GetYCoord();
+        }
+      }
+      playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
+      UpdatePieces();
+    }
+    if (isKingInCheck('W', ChessPieceContainer)) {
+      int kingX = 0;
+      int kingY = 0;
+      for (int i = 0; i < numPieces; i++) {
+        if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == 'W') {
+          kingX = ChessPieceContainer[i].GetXCoord();
+          kingY = ChessPieceContainer[i].GetYCoord();
+        }
+      }
+      playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
+      UpdatePieces();
+    }
   }
 
   // Initialize pieces on the board
@@ -304,12 +329,14 @@ public class ChessFrame extends JFrame {
 
     // -- Piece Selection -- //
     SelectedCoordinatesList = coordinatesList;
-    if (copiedPiece.GetSymbol() != 'K') {
-      SelectedCoordinatesList = CheckForMates(coordinatesList,
-          copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
-    } else {
-      SelectedCoordinatesList = coordinatesList;
-    }
+    // if (copiedPiece.GetSymbol() != 'K') {
+    // SelectedCoordinatesList = CheckForMates(coordinatesList,
+    // copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
+    // } else {
+    // SelectedCoordinatesList = coordinatesList;
+    // }
+    SelectedCoordinatesList = CheckForMates(coordinatesList,
+        copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
 
     for (int[] coordinates : SelectedCoordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
@@ -324,6 +351,7 @@ public class ChessFrame extends JFrame {
       piece.SetMoveStatus(true);
       piece.SetYCoord(newY);
       piece.SetXCoord(newX);
+      System.out.println("Ya this valid move to from " + piece.getClass().getName() + " to " + newX + newY);
     }
     UpdatePieces();
   }
@@ -555,17 +583,13 @@ public class ChessFrame extends JFrame {
             break;
         }
       }
-
-      for (int i = 0; i < 32; i++) {
-        tempBoard[i].SetXCoord(ChessPieceContainer[i].GetXCoord());
-        tempBoard[i].SetYCoord(ChessPieceContainer[i].GetYCoord());
-      }
       int tempPiece = returnNewCopiedPiece(tempBoard);
 
-      // tempBoard[tempPiece].SetXCoord(x);
-      // tempBoard[tempPiece].SetYCoord(y);
       MakeMove(tempBoard[tempPiece].GetXCoord(), tempBoard[tempPiece].GetYCoord(), x, y, tempBoard,
           tempBoard[tempPiece]);
+      tempBoard[tempPiece].SetYCoord(y);
+      tempBoard[tempPiece].SetXCoord(x);
+      System.out.println(tempBoard[tempPiece].getClass().getName() + " is moving to " + x + y);
       if (!isKingInCheck(playerSide, tempBoard)) {
         ReturnMoves.add(new int[] { x, y });
       }
@@ -587,9 +611,10 @@ public class ChessFrame extends JFrame {
     int kingX = 0;
     int kingY = 0;
     for (int i = 0; i < 32; i++) {
-      if (ChessPieceContainer[i].GetPlayerSide() == playerSide && ChessPieceContainer[i].GetSymbol() == 'K') {
-        kingX = ChessPieceContainer[i].GetXCoord();
-        kingY = ChessPieceContainer[i].GetYCoord();
+      if (board[i].GetPlayerSide() == playerSide && board[i].GetSymbol() == 'K') {
+        kingX = board[i].GetXCoord();
+        kingY = board[i].GetYCoord();
+        System.out.println("King is at " + kingX + " " + kingY);
       }
     }
     ArrayList<int[]> opponentsMoves = new ArrayList<>();
@@ -597,7 +622,7 @@ public class ChessFrame extends JFrame {
       if (board[i].IsAlive() &&
           board[i].GetPlayerSide() != playerSide) {
         // If the opponent's chess piece is alive
-        ArrayList<int[]> tempMoves = board[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
+        ArrayList<int[]> tempMoves = board[i].ValidMoves(board[i].GetXCoord(),
             board[i].GetYCoord(), board, numPieces);
         for (int[] moves : tempMoves) {
           int x = moves[0];
@@ -608,8 +633,7 @@ public class ChessFrame extends JFrame {
       }
     }
     if (OpponentSet.contains((kingY * 8) + kingX)) {
-      playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
-      UpdatePieces();
+      System.out.println("King is in check if it is at " + kingX + " " + kingY);
       return true;
     }
     // for (int[] theirMoves : opponentsMoves) {
