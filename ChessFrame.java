@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Set;
 
 public class ChessFrame extends JFrame {
   // -------- Variables -------- //
@@ -24,21 +25,49 @@ public class ChessFrame extends JFrame {
   Color validMoveColor = new Color(255, 255, 0);
   Color checkColor = new Color(255, 0, 0);
   AudioInputStream audioInputStream;
-  File moveSound;
-  Clip move;
+  File fileSound;
+  Clip sound;
+  boolean playCheckSound;
 
   public void PlayMoveSound() {
     try {
-      moveSound = new File("Resources/move-self.wav");
-      audioInputStream = AudioSystem.getAudioInputStream(moveSound);
-      move = AudioSystem.getClip();
-      move.open(audioInputStream);
-      move.start();
+      fileSound = new File("Resources/move-self.wav");
+      audioInputStream = AudioSystem.getAudioInputStream(fileSound);
+      sound = AudioSystem.getClip();
+      sound.open(audioInputStream);
+      sound.start();
 
     } catch (Exception e) {
       System.out.println("Problem with finding moveSound");
     }
   }
+
+  public void PlayCheckSound() {
+    try {
+      fileSound = new File("Resources/check.wav");
+      audioInputStream = AudioSystem.getAudioInputStream(fileSound);
+      sound = AudioSystem.getClip();
+      sound.open(audioInputStream);
+      sound.start();
+
+    } catch (Exception e) {
+      System.out.println("Problem with finding checkSound");
+    }
+  }
+
+  public void PlayWinSound() {
+    try {
+      fileSound = new File("Resources/win.wav");
+      audioInputStream = AudioSystem.getAudioInputStream(fileSound);
+      sound = AudioSystem.getClip();
+      sound.open(audioInputStream);
+      sound.start();
+
+    } catch (Exception e) {
+      System.out.println("Problem with finding winSound");
+    }
+  }
+
   // This sound was used from this forum post :
   // https://www.chess.com/forum/view/general/chessboard-sound-files
 
@@ -353,6 +382,7 @@ public class ChessFrame extends JFrame {
     }
     JLabel no = new JLabel("Quit");
     String[] YesOrNo = { "Play again", "Quit" };
+    PlayWinSound();
     int n = JOptionPane.showOptionDialog(this, "You won! Congratulations!",
         "CheckMate!", JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE, winnerIcon, YesOrNo, no);
@@ -461,6 +491,10 @@ public class ChessFrame extends JFrame {
      * }
      * }
      */
+  }
+
+  public void AddMovesToSet(Set<Integer> TheSet, ChessPiece piece) {
+
   }
 
   public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
@@ -776,19 +810,13 @@ public class ChessFrame extends JFrame {
 
       if (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer)) {
         CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
-        for (int i = 0; i < 32; i++) {
-          if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == 'B') {
-            selectPiece(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetXCoord());
-          }
-        }
         CheckForMates(tempMoves, 'W', ChessPieceContainer, copiedPiece, 1);
-        for (int i = 0; i < 32; i++) {
-          if (ChessPieceContainer[i].GetSymbol() == 'K' && ChessPieceContainer[i].GetPlayerSide() == 'W') {
-            selectPiece(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetXCoord());
-          }
+        if (!playCheckSound) {
+          PlayCheckSound();
+          playCheckSound = true;
         }
-        CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
-        CheckForMates(tempMoves, 'W', ChessPieceContainer, copiedPiece, 1);
+      } else {
+        playCheckSound = false;
       }
     }
 

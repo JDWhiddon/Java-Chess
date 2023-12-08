@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -179,6 +181,7 @@ public class King extends ChessPiece {
 	}
 
 	public ArrayList<int[]> ValidMoves(int TheKingX, int TheKingY, ChessPiece[] ChessPieceContainer) {
+		Set<Integer> OpponentSet = new HashSet();
 		ArrayList<int[]> opponentsMoves = new ArrayList<>();
 		ArrayList<int[]> KingMoves = new ArrayList<>();
 		ArrayList<int[]> tempMoves = new ArrayList<>();
@@ -205,7 +208,8 @@ public class King extends ChessPiece {
 			for (int[] moves : tempMoves) {
 				int tempX = moves[0];
 				int tempY = moves[1];
-				opponentsMoves.add(new int[] { tempX, tempY });
+				// opponentsMoves.add(new int[] { tempX, tempY });
+				OpponentSet.add((tempY - 1) * 8 + tempX);
 			}
 		}
 
@@ -217,16 +221,19 @@ public class King extends ChessPiece {
 			boolean shouldAdd = true;
 
 			// Remove all the moves that would put it in check
-			for (int[] theirMoves : opponentsMoves) {
-				int theirX = theirMoves[0];
-				int theirY = theirMoves[1];
-				if (kingX == theirX && kingY == theirY) {
-					// Move shouldnt be added to the available moves arr
-					shouldAdd = false;
-				}
-			}
-			if (shouldAdd == true)
+			// for (int[] theirMoves : opponentsMoves) {
+			// int theirX = theirMoves[0];
+			// int theirY = theirMoves[1];
+			// if (kingX == theirX && kingY == theirY) {
+			// // Move shouldnt be added to the available moves arr
+			// shouldAdd = false;
+			// }
+			// }
+			if (!OpponentSet.contains((kingY - 1) * 8 + kingX)) {
 				AvailableMoves.add(new int[] { kingX, kingY });
+			}
+			// if (shouldAdd == true)
+			// AvailableMoves.add(new int[] { kingX, kingY });
 		}
 
 		return AvailableMoves;
