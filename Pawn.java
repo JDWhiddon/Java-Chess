@@ -30,16 +30,19 @@ public class Pawn extends ChessPiece {
 	public void DetectSpecialMove(int x, int y, ChessPiece cp) {
 		if (playerSide == 'W' && cp.IsAlive()) {
 			// Front movement (Blocked)
-			if (cp.GetXCoord() == x && cp.GetYCoord() == (y + 1)) {
+			if (cp.GetXCoord() == x && cp.GetYCoord() == (y + 1) 
+				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[0] = true;
 				isBlocked = true;
 			}
 			// Diagonal right capture
-			if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y + 1)) {
+			if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y + 1) 
+				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[1] = true;
 			}
 			// Diagonal left capture
-			if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y + 1)) {
+			if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y + 1) 
+				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[2] = true;
 			}
 			/*
@@ -62,11 +65,13 @@ public class Pawn extends ChessPiece {
 				isBlocked = true;
 			}
 			// Diagonal right capture
-			if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y - 1)) {
+			if (cp.GetXCoord() == (x + 1) && cp.GetYCoord() == (y - 1) 
+				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[1] = true;
 			}
 			// Diagonal left capture
-			if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y - 1)) {
+			if (cp.GetXCoord() == (x - 1) && cp.GetYCoord() == (y - 1) 
+				&& cp.GetPlayerSide() != GetPlayerSide()) {
 				choices[2] = true;
 			}
 			/*
