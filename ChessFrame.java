@@ -13,6 +13,7 @@ import javax.swing.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -373,7 +374,7 @@ public class ChessFrame extends JFrame {
       System.exit(0);
     } else {
       DefaultGameSetup(ChessPieceContainer);
-			turnCount = 1;
+      turnCount = 1;
       UpdatePieces();
     }
 
@@ -478,32 +479,38 @@ public class ChessFrame extends JFrame {
 
   }
 
+  public boolean CheckForCheckMates(char playerSide) {
+    return true;
+  }
+
   public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
       ChessPiece[] realBoard, ChessPiece selectedPiece, int RecursiveCall) {
-    if (RecursiveCall == 1 && (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer))) {
-      boolean canMove = false;
-      for (int i = 0; i < 32; i++) {
-        if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
-          int tempX = ChessPieceContainer[i].GetXCoord();
-          int tempY = ChessPieceContainer[i].GetYCoord();
-          ArrayList<int[]> TempReturnMoves = CheckForMates(ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard, numPieces),
-              ChessPieceContainer[i].GetPlayerSide(), realBoard,
-              ChessPieceContainer[i], 0);
-          if (TempReturnMoves.size() > 0) {
-            canMove = true;
-          }
-        }
-      }
-      if (canMove) {
+    // if (RecursiveCall == 1 && (isKingInCheck('W', ChessPieceContainer) ||
+    // isKingInCheck('B', ChessPieceContainer))) {
+    // boolean canMove = false;
+    // for (int i = 0; i < 32; i++) {
+    // if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
+    // int tempX = ChessPieceContainer[i].GetXCoord();
+    // int tempY = ChessPieceContainer[i].GetYCoord();
+    // ArrayList<int[]> TempReturnMoves = CheckForMates(
+    // ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard, numPieces),
+    // ChessPieceContainer[i].GetPlayerSide(), realBoard,
+    // ChessPieceContainer[i], 0);
+    // if (TempReturnMoves.size() > 0) {
+    // canMove = true;
+    // }
+    // }
+    // }
+    // if (canMove) {
 
-      } else {
-        System.out.println("Checkmate");
-        if (isKingInCheck('W', realBoard))
-          PrintWinnerDialog('B');
-        else
-          PrintWinnerDialog('W');
-      }
-    }
+    // } else {
+    // System.out.println("Checkmate");
+    // if (isKingInCheck('W', realBoard))
+    // PrintWinnerDialog('B');
+    // else
+    // PrintWinnerDialog('W');
+    // }
+    // }
     // This ArrayList will store all of the moves that WONT put the king in check
     ArrayList<int[]> ReturnMoves = new ArrayList<>();
     int kingX = 0;
@@ -563,10 +570,6 @@ public class ChessFrame extends JFrame {
         ReturnMoves.add(new int[] { x, y });
       }
     }
-    for (int[] xy : ReturnMoves) {
-      int x = xy[0];
-      int y = xy[1];
-    }
     return ReturnMoves;
   }
 
@@ -580,6 +583,7 @@ public class ChessFrame extends JFrame {
 
   public boolean isKingInCheck(char playerSide, ChessPiece[] board) {
     // Adds all of their moves to an ArrayList
+    Set<Integer> OpponentSet = new HashSet();
     int kingX = 0;
     int kingY = 0;
     for (int i = 0; i < 32; i++) {
@@ -598,20 +602,26 @@ public class ChessFrame extends JFrame {
         for (int[] moves : tempMoves) {
           int x = moves[0];
           int y = moves[1];
-          opponentsMoves.add(new int[] { x, y });
+          // opponentsMoves.add(new int[] { x, y });
+          OpponentSet.add((y * 8) + x);
         }
       }
     }
-    for (int[] theirMoves : opponentsMoves) {
-      int theirX = theirMoves[0];
-      int theirY = theirMoves[1];
-      if (kingX == theirX && kingY == theirY) {
-        // Move shouldnt be added to the available moves arr
-        playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
-        UpdatePieces();
-        return true;
-      }
+    if (OpponentSet.contains((kingY * 8) + kingX)) {
+      playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
+      UpdatePieces();
+      return true;
     }
+    // for (int[] theirMoves : opponentsMoves) {
+    // int theirX = theirMoves[0];
+    // int theirY = theirMoves[1];
+    // // if (kingX == theirX && kingY == theirY) {
+    // // // Move shouldnt be added to the available moves arr
+    // // playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
+    // // UpdatePieces();
+    // // return true;
+    // // }
+    // }
     return false;
   }
 
@@ -790,8 +800,8 @@ public class ChessFrame extends JFrame {
       ArrayList<int[]> tempMoves = new ArrayList<>();
 
       if (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer)) {
-        CheckForMates(tempMoves, 'B', ChessPieceContainer, copiedPiece, 1);
-        CheckForMates(tempMoves, 'W', ChessPieceContainer, copiedPiece, 1);
+        CheckForCheckMates('B');
+        CheckForCheckMates('W');
         if (!playCheckSound) {
           PlayCheckSound();
           playCheckSound = true;
