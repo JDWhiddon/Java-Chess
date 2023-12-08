@@ -17,7 +17,7 @@ public class Rook extends ChessPiece {
 	private int limitedRightBound = 9;
 	private int limitedLowerBound = 0;
 	private int limitedUpperBound = 9;
-	
+
 	// -- Used for comparison -- //
 	private int previousLeftBound = 0;
 	private int previousRightBound = 9;
@@ -47,13 +47,13 @@ public class Rook extends ChessPiece {
 
 	// Cancel piece movement if another piece is in the line of sight
 	public void CancelCoordinates(int x, int y, ChessPiece cp) {
-		// Modify the max amount of a certain direction 
+		// Modify the max amount of a certain direction
 		// to fit within the bounds
 		int leftMax = x - leftBound;
 		int rightMax = rightBound - x;
 		int lowerMax = y - lowerBound;
 		int upperMax = upperBound - y;
-		
+
 		// Check if a piece is alive on a space
 		if (cp.IsAlive()) {
 			// Going -> Top //
@@ -80,7 +80,7 @@ public class Rook extends ChessPiece {
 					limitedLeftBound = x - i;
 				}
 			}
-		} 
+		}
 
 		// Detect if there is a capture on an adjacent space
 		DetectCapture(x, y, cp);
@@ -116,14 +116,14 @@ public class Rook extends ChessPiece {
 	// Adds a capture space since the piece originally avoids
 	// any piece
 	public void DetectCapture(int x, int y, ChessPiece cp) {
-		// Modify the max amount of a certain direction 
+		// Modify the max amount of a certain direction
 		// to fit within the bounds
 		int leftMax = x - leftBound;
 		int rightMax = rightBound - x;
 		int lowerMax = y - lowerBound;
 		int upperMax = upperBound - y;
-		
-		// -- White Side Capture -- // 
+
+		// -- White Side Capture -- //
 		if (playerSide == 'W' && cp.IsAlive() && cp.GetPlayerSide() == 'B') {
 			// Going -> Top //
 			if (cp.GetXCoord() == x && cp.GetYCoord() == limitedUpperBound) {
@@ -141,8 +141,8 @@ public class Rook extends ChessPiece {
 			if (cp.GetXCoord() == limitedLeftBound && cp.GetYCoord() == y) {
 				limitedLeftBound = limitedLeftBound - 1;
 			}
-		} 
-		// -- Black Side Capture -- // 
+		}
+		// -- Black Side Capture -- //
 		else if (playerSide == 'B' && cp.IsAlive() && cp.GetPlayerSide() == 'W') {
 			// Going -> Top //
 			if (cp.GetXCoord() == x && cp.GetYCoord() == limitedUpperBound) {
@@ -167,10 +167,10 @@ public class Rook extends ChessPiece {
 	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
-		for (int i = 0; i < numPieces; i++) {
-      CancelCoordinates(x, y, copyPieceContainer[i]);
-    }
-		// Modify the max amount of a certain direction 
+		for (int i = 0; i < 32; i++) {
+			CancelCoordinates(x, y, copyPieceContainer[i]);
+		}
+		// Modify the max amount of a certain direction
 		// to fit within the bounds
 		int leftMax = x - limitedLeftBound;
 		int rightMax = limitedRightBound - x;
