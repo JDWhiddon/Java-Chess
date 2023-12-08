@@ -393,10 +393,10 @@ class Queen extends ChessPiece {
 	}
 
 	// Search the each coordinate for valid moves
-	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
+	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
-		for (int i = 0; i < 32; i++) {
+		for (int i = 0; i < numPieces; i++) {
       CancelCoordinates(x, y, copyPieceContainer[i]);
     }
 		// Modify the max amount of a certain direction 

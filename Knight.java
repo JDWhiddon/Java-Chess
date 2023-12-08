@@ -121,7 +121,7 @@ public class Knight extends ChessPiece {
 	}
 
 	// Search each valid move within the bounds of the board
-	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
+	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
     ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
 		for (int i = 0; i < copyPieceContainer.length; i++) {

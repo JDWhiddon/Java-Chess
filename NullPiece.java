@@ -1,3 +1,9 @@
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Vector;
+
+import javax.swing.*;
+
 public class NullPiece extends ChessPiece {
 	private char symbol = 'O';
 
@@ -9,7 +15,9 @@ public class NullPiece extends ChessPiece {
 		return symbol;
 	}
 
-	public void Move(int x, int y) {
-		System.out.println("Test");
-	}
+	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
+    ArrayList<int[]> coordinatesList = new ArrayList<>();
+		
+		return coordinatesList;
+	}	
 }

@@ -30,7 +30,7 @@ public abstract class ChessPiece {
     // Reads in the current xCoord and yCoord and calculates the maximum distance
     // per move
     // or the valid positions if applicable
-    public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
+    public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
         ArrayList<int[]> coordinatesList = new ArrayList<>();
         return coordinatesList;
     }

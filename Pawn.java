@@ -90,9 +90,11 @@ public class Pawn extends ChessPiece {
 
 	}
 
-	public ArrayList<int[]> PawnSpecialMove(int x, int y, ChessPiece[] copyPieceContainer) {
+	public ArrayList<int[]> PawnSpecialMove(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
 
-		ArrayList<int[]> SelectedCoordinatesList = ValidMoves(x, y, copyPieceContainer);
+		//ArrayList<int[]> SelectedCoordinatesList = ValidMoves(x, y, copyPieceContainer, numPieces);
+		ArrayList<int[]> SelectedCoordinatesList = new ArrayList<>();
+		 
 		if (playerSide == 'W') {
 			// Diagonal Right Capture
 			if (choices[1] == true && y < upperBound && x < rightBound) {
@@ -138,11 +140,12 @@ public class Pawn extends ChessPiece {
 		return SelectedCoordinatesList;
 	}
 
-	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer) {
+	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
 		movedTwice = false;
-		ArrayList<int[]> coordinatesList = new ArrayList<>();
+		//ArrayList<int[]> coordinatesList = new ArrayList<>();
+		ArrayList<int[]> coordinatesList = PawnSpecialMove(x, y, copyPieceContainer, numPieces);
 		// -- Search the whole container for occupied spaces -- //
-		for (int i = 0; i < copyPieceContainer.length; i++) {
+		for (int i = 0; i < numPieces; i++) {
 			DetectSpecialMove(x, y, copyPieceContainer[i]);
 		}
 		if (playerSide == 'W') {

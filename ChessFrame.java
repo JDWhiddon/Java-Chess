@@ -294,21 +294,14 @@ public class ChessFrame extends JFrame {
     int pivotxCoord = copiedPiece.GetXCoord();
     int pivotyCoord = copiedPiece.GetYCoord();
     boolean overrideValidMove = false;
-    ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(pivotxCoord, pivotyCoord, ChessPieceContainer);
+    ArrayList<int[]> coordinatesList = copiedPiece.ValidMoves(pivotxCoord, pivotyCoord, ChessPieceContainer, numPieces);
 
     // Resets the background of each square, so that the moves reset when
     // deselecting a piece
 
     ResetBoardBackground();
 
-    // ---- Piece Selection ---- //
-    // From java.lang.Class<T>, using .getClass().getName()
-    switch (copiedPiece.getClass().getName()) {
-      case "Pawn":
-        coordinatesList = ModifyPawnMovement(pivotxCoord, pivotyCoord);
-        System.out.println("Pawn ");
-        break;
-    }
+    // -- Piece Selection -- //
     SelectedCoordinatesList = coordinatesList;
     if (copiedPiece.GetSymbol() != 'K') {
       SelectedCoordinatesList = CheckForMates(coordinatesList,
@@ -321,19 +314,6 @@ public class ChessFrame extends JFrame {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
     }
     return SelectedCoordinatesList;
-  }
-
-  // -------- Valid Move Helper Functions -------- //
-  // Shows valid pawn movement based on the posmakemoveition of other pieces
-  // May integrate into the pawn class if possible
-  public ArrayList<int[]> ModifyPawnMovement(int x, int y) {
-    // To access pawn only methods
-    Pawn copiedPawn = (Pawn) copiedPiece;
-    ArrayList<int[]> coordinatesList = new ArrayList<>();
-
-    coordinatesList = copiedPawn.PawnSpecialMove(x, y, ChessPieceContainer);
-
-    return coordinatesList;
   }
 
   // ------------ Move Functions ------------ //
@@ -393,6 +373,7 @@ public class ChessFrame extends JFrame {
       System.exit(0);
     } else {
       DefaultGameSetup(ChessPieceContainer);
+			turnCount = 1;
       UpdatePieces();
     }
 
@@ -505,7 +486,7 @@ public class ChessFrame extends JFrame {
         if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
           int tempX = ChessPieceContainer[i].GetXCoord();
           int tempY = ChessPieceContainer[i].GetYCoord();
-          ArrayList<int[]> TempReturnMoves = CheckForMates(ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard),
+          ArrayList<int[]> TempReturnMoves = CheckForMates(ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard, numPieces),
               ChessPieceContainer[i].GetPlayerSide(), realBoard,
               ChessPieceContainer[i], 0);
           if (TempReturnMoves.size() > 0) {
@@ -613,7 +594,7 @@ public class ChessFrame extends JFrame {
           board[i].GetPlayerSide() != playerSide) {
         // If the opponent's chess piece is alive
         ArrayList<int[]> tempMoves = board[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
-            board[i].GetYCoord(), board);
+            board[i].GetYCoord(), board, numPieces);
         for (int[] moves : tempMoves) {
           int x = moves[0];
           int y = moves[1];

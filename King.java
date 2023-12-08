@@ -127,10 +127,10 @@ public class King extends ChessPiece {
 	}
 
 	// Search each valid move within the bounds of the board
-	public ArrayList<int[]> TheKingsMoves(int x, int y, ChessPiece[] ChessPieceContainer) {
+	public ArrayList<int[]> TheKingsMoves(int x, int y, ChessPiece[] ChessPieceContainer, int numPieces) {
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
-		for (int i = 0; i < 32; i++) {
+		for (int i = 0; i < numPieces; i++) {
 			CancelCoordinates(x, y, ChessPieceContainer[i]);
 		}
 
@@ -180,14 +180,14 @@ public class King extends ChessPiece {
 		return coordinatesList;
 	}
 
-	public ArrayList<int[]> ValidMoves(int TheKingX, int TheKingY, ChessPiece[] ChessPieceContainer) {
+	public ArrayList<int[]> ValidMoves(int TheKingX, int TheKingY, ChessPiece[] ChessPieceContainer, int numPieces) {
 		Set<Integer> OpponentSet = new HashSet();
 		ArrayList<int[]> opponentsMoves = new ArrayList<>();
 		ArrayList<int[]> KingMoves = new ArrayList<>();
 		ArrayList<int[]> tempMoves = new ArrayList<>();
-		KingMoves = TheKingsMoves(GetXCoord(), GetYCoord(), ChessPieceContainer);
+		KingMoves = TheKingsMoves(GetXCoord(), GetYCoord(), ChessPieceContainer, numPieces);
 		for (int coords[] : KingMoves) {
-			for (int i = 0; i < 32; i++) {
+			for (int i = 0; i < numPieces; i++) {
 				if (ChessPieceContainer[i].GetXCoord() == coords[0] && ChessPieceContainer[i].GetYCoord() == coords[1]
 						&& ChessPieceContainer[i].IsAlive())
 					opponentsMoves.add(new int[] { coords[0], coords[1] });
@@ -195,15 +195,15 @@ public class King extends ChessPiece {
 		}
 
 		// Adds all of their moves to an ArrayList
-		for (int i = 0; i < 32; i++) {
+		for (int i = 0; i < numPieces; i++) {
 			if (ChessPieceContainer[i].GetPlayerSide() != playerSide && ChessPieceContainer[i].GetSymbol() == 'K') {
 				tempMoves = TheKingsMoves(ChessPieceContainer[i].GetXCoord(), ChessPieceContainer[i].GetYCoord(),
-						ChessPieceContainer);
+						ChessPieceContainer, numPieces);
 			} else if (ChessPieceContainer[i].IsAlive() &&
 					ChessPieceContainer[i].GetPlayerSide() != playerSide) {
 				// If the opponent's chess piece is alive
 				tempMoves = ChessPieceContainer[i].ValidMoves(ChessPieceContainer[i].GetXCoord(),
-						ChessPieceContainer[i].GetYCoord(), ChessPieceContainer);
+						ChessPieceContainer[i].GetYCoord(), ChessPieceContainer, numPieces);
 			}
 			for (int[] moves : tempMoves) {
 				int tempX = moves[0];
