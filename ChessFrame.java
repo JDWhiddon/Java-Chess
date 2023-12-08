@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -10,6 +12,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboBoxUI.ItemHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +24,8 @@ public class ChessFrame extends JFrame {
   // -------- Variables -------- //
 
   private GridLayout chessBoard;
+  private JRadioButtonMenuItem theThemes[];
+
   Color cream = new Color(238, 238, 210);
   Color green = new Color(118, 150, 86);
   Color validMoveColor = new Color(255, 255, 0);
@@ -29,6 +34,14 @@ public class ChessFrame extends JFrame {
   File fileSound;
   Clip sound;
   boolean playCheckSound;
+
+  private JRadioButtonMenuItem ThemeItems[];
+  // Color pallets used from this blog post
+  // https://omgchess.blogspot.com/2015/09/chess-board-color-schemes.html
+  Color colors1[] = { cream, new Color(112, 102, 119), new Color(111, 115, 210), new Color(111, 143, 114) };
+  Color colors2[] = { green, new Color(204, 183, 174), new Color(157, 172, 255), new Color(173, 189, 143) };
+  private int themeIndex = 0;
+  private ButtonGroup themeButtonGroup;
 
   public void PlayMoveSound() {
     try {
@@ -119,6 +132,39 @@ public class ChessFrame extends JFrame {
     chessBoard = new GridLayout(8, 8);
     setLayout(chessBoard);
     CreateBoard();
+
+    JMenu themeMenu = new JMenu("Theme");
+    String themeNames[] = { "Default", "Royal", "Icy", "Emerald" };
+    theThemes = new JRadioButtonMenuItem[themeNames.length];
+    themeButtonGroup = new ButtonGroup();
+    ItemHandler itemHandler = new ItemHandler(); // handler for themes
+
+    for (int i = 0; i < theThemes.length; i++) {
+      theThemes[i] = new JRadioButtonMenuItem(themeNames[i]);
+      themeMenu.add(theThemes[i]);
+      themeButtonGroup.add(theThemes[i]);
+      theThemes[i].addActionListener((ActionListener) itemHandler);
+    }
+    theThemes[0].setSelected(true);
+    JMenuBar bar = new JMenuBar();
+    setJMenuBar(bar);
+    bar.add(themeMenu);
+
+  }
+
+  private class ItemHandler implements ActionListener {
+    // process color and font selections
+    public void actionPerformed(ActionEvent event) {
+      // process color selection
+      for (int i = 0; i < theThemes.length; i++) {
+        if (theThemes[i].isSelected()) {
+          themeIndex = i;
+          ResetBoardBackground();
+          break;
+        }
+      }
+      repaint();
+    }
   }
 
   // Sets up the board and places all of the pieces
@@ -151,11 +197,11 @@ public class ChessFrame extends JFrame {
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
         if ((j % 2 == 0) && (i % 2 == 0))
-          playSquare[i][j].setBackground(cream);
+          playSquare[i][j].setBackground(colors1[themeIndex]);
         else if ((j % 2 != 0) && (i % 2 != 0))
-          playSquare[i][j].setBackground(cream);
+          playSquare[i][j].setBackground(colors1[themeIndex]);
         else
-          playSquare[i][j].setBackground(green);
+          playSquare[i][j].setBackground(colors2[themeIndex]);
       }
     }
     // Find each king and paint the squares red if in check
@@ -507,20 +553,30 @@ public class ChessFrame extends JFrame {
   }
 
   public boolean CheckForCheckMates(char playerSide) {
+    int copyIndex = -1;
+    for (int i = 0; i < numPieces; i++) {
+      if (copiedPiece.GetXCoord() == ChessPieceContainer[i].GetXCoord()
+          && copiedPiece.GetYCoord() == ChessPieceContainer[i].GetYCoord()
+          && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].GetMoveableStatus() == true) {
+        copyIndex = i;
+      }
+    }
     for (int i = 0; i < 32; i++) {
       if (ChessPieceContainer[i].GetPlayerSide() == playerSide && ChessPieceContainer[i].IsAlive()) {
         int tempX = ChessPieceContainer[i].GetXCoord();
         int tempY = ChessPieceContainer[i].GetYCoord();
+
         copiedPiece = ChessPieceContainer[i];
         ArrayList<int[]> TempReturnMoves = CheckForMates(
             ChessPieceContainer[i].ValidMoves(tempX, tempY, ChessPieceContainer, numPieces),
             ChessPieceContainer[i].GetPlayerSide(), ChessPieceContainer,
             ChessPieceContainer[i], 0);
         if (TempReturnMoves.size() > 0) {
+          copiedPiece = ChessPieceContainer[copyIndex];
+
           return false;
         }
       }
-
     }
     System.out.println(playerSide + " King is IN CHECKMATE");
     if (playerSide == 'B') {
@@ -868,4 +924,5 @@ public class ChessFrame extends JFrame {
     public void mouseExited(MouseEvent e) {
     }
   }
+
 }
