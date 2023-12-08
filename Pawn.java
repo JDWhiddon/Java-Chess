@@ -30,8 +30,7 @@ public class Pawn extends ChessPiece {
 	public void DetectSpecialMove(int x, int y, ChessPiece cp) {
 		if (playerSide == 'W' && cp.IsAlive()) {
 			// Front movement (Blocked)
-			if (cp.GetXCoord() == x && cp.GetYCoord() == (y + 1) 
-				&& cp.GetPlayerSide() != GetPlayerSide()) {
+			if (cp.GetXCoord() == x && cp.GetYCoord() == (y + 1)) {
 				choices[0] = true;
 				isBlocked = true;
 			}
@@ -143,11 +142,11 @@ public class Pawn extends ChessPiece {
 	public ArrayList<int[]> ValidMoves(int x, int y, ChessPiece[] copyPieceContainer, int numPieces) {
 		movedTwice = false;
 		//ArrayList<int[]> coordinatesList = new ArrayList<>();
-		ArrayList<int[]> coordinatesList = PawnSpecialMove(x, y, copyPieceContainer, numPieces);
 		// -- Search the whole container for occupied spaces -- //
 		for (int i = 0; i < numPieces; i++) {
 			DetectSpecialMove(x, y, copyPieceContainer[i]);
 		}
+		ArrayList<int[]> coordinatesList = PawnSpecialMove(x, y, copyPieceContainer, numPieces);
 		if (playerSide == 'W') {
 			// At start position
 			if (y < upperBound && isBlocked == false) {
