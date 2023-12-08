@@ -351,7 +351,6 @@ public class ChessFrame extends JFrame {
       piece.SetMoveStatus(true);
       piece.SetYCoord(newY);
       piece.SetXCoord(newX);
-      System.out.println("Ya this valid move to from " + piece.getClass().getName() + " to " + newX + newY);
     }
     UpdatePieces();
   }
@@ -508,6 +507,22 @@ public class ChessFrame extends JFrame {
   }
 
   public boolean CheckForCheckMates(char playerSide) {
+    for (int i = 0; i < 32; i++) {
+      if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
+        int tempX = ChessPieceContainer[i].GetXCoord();
+        int tempY = ChessPieceContainer[i].GetYCoord();
+        ArrayList<int[]> TempReturnMoves = CheckForMates(
+            ChessPieceContainer[i].ValidMoves(tempX, tempY, ChessPieceContainer, numPieces),
+            ChessPieceContainer[i].GetPlayerSide(), ChessPieceContainer,
+            ChessPieceContainer[i], 0);
+        if (TempReturnMoves.size() > 0) {
+          System.out.println(playerSide + " King is not in checkmate");
+          return false;
+        }
+      }
+
+    }
+    System.out.println(playerSide + " King is IN CHECKMATE");
     return true;
   }
 
@@ -589,7 +604,6 @@ public class ChessFrame extends JFrame {
           tempBoard[tempPiece]);
       tempBoard[tempPiece].SetYCoord(y);
       tempBoard[tempPiece].SetXCoord(x);
-      System.out.println(tempBoard[tempPiece].getClass().getName() + " is moving to " + x + y);
       if (!isKingInCheck(playerSide, tempBoard)) {
         ReturnMoves.add(new int[] { x, y });
       }
@@ -614,7 +628,6 @@ public class ChessFrame extends JFrame {
       if (board[i].GetPlayerSide() == playerSide && board[i].GetSymbol() == 'K') {
         kingX = board[i].GetXCoord();
         kingY = board[i].GetYCoord();
-        System.out.println("King is at " + kingX + " " + kingY);
       }
     }
     ArrayList<int[]> opponentsMoves = new ArrayList<>();
@@ -633,7 +646,6 @@ public class ChessFrame extends JFrame {
       }
     }
     if (OpponentSet.contains((kingY * 8) + kingX)) {
-      System.out.println("King is in check if it is at " + kingX + " " + kingY);
       return true;
     }
     // for (int[] theirMoves : opponentsMoves) {
