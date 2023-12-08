@@ -4,6 +4,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.lang.reflect.Array;
 import java.nio.channels.OverlappingFileLockException;
+import java.io.File;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import javax.swing.*;
 
@@ -19,6 +23,24 @@ public class ChessFrame extends JFrame {
   Color green = new Color(118, 150, 86);
   Color validMoveColor = new Color(255, 255, 0);
   Color checkColor = new Color(255, 0, 0);
+  AudioInputStream audioInputStream;
+  File moveSound;
+  Clip move;
+
+  public void PlayMoveSound() {
+    try {
+      moveSound = new File("Resources/move-self.wav");
+      audioInputStream = AudioSystem.getAudioInputStream(moveSound);
+      move = AudioSystem.getClip();
+      move.open(audioInputStream);
+      move.start();
+
+    } catch (Exception e) {
+      System.out.println("Problem with finding moveSound");
+    }
+  }
+  // This sound was used from this forum post :
+  // https://www.chess.com/forum/view/general/chessboard-sound-files
 
   /*
    * -- Container for the in play chess pieces --
@@ -733,6 +755,8 @@ public class ChessFrame extends JFrame {
                       copiedPiece);
                   turnCount++;
                   System.out.println("New turn Count: " + turnCount);
+                  PlayMoveSound();
+
                   // DetermineTurnOrder();
                   ResetBoardBackground();
                   UpdatePieces();
