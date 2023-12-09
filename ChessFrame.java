@@ -85,20 +85,12 @@ public class ChessFrame extends JFrame {
     }
   }
 
-  /*
-   * -- Container for the in play chess pieces --
-   * // Probably use a different data structure but arrays for now
-   * // (maybe an ArrayList if sticking to arrays)
-   */
+  //-- Container for the in play chess pieces --
+   
   private ChessPiece[] ChessPieceContainer = new ChessPiece[32];
-  /*
-   * -- Will be used depending on the setup --
-   * // 32 for DefaultGameSetup
-   * // 6 = TestGameSetup
-   */
+ 
   private int numPieces;
-  // < Insert captured pieces on white container here >
-  // < Insert captured pieces on black container here >
+  
 
   /*
    * -- ChessPiece Copy --
@@ -110,9 +102,7 @@ public class ChessFrame extends JFrame {
    * // Determines whether a move should be taken
    */
   private boolean isSelected = false;
-  /* Extracted coords from ChessPiece object */
-  // private int xCoord;
-  // private int yCoord;
+  
   /* Valid moves from the selected piece */
   ArrayList<int[]> SelectedCoordinatesList;
 
@@ -188,7 +178,6 @@ public class ChessFrame extends JFrame {
 
     // Sets up the board
     DefaultGameSetup(ChessPieceContainer);
-    // TestGameSetup();
   }
 
   // To reset the JPanel Backgrounds
@@ -308,38 +297,6 @@ public class ChessFrame extends JFrame {
     }
   }
 
-  // Initialize specific pieces for testing purposes
-  private void TestGameSetup() {
-    // ** Needs to be modified per amount of content in the ChessPieceContainer **
-    numPieces = 22;
-
-    // ---- White ---- //
-    ChessPieceContainer[0] = new King(5, 1, 'W');
-    ChessPieceContainer[1] = new Rook(1, 1, 'W');
-    ChessPieceContainer[2] = new Rook(8, 1, 'W');
-    for (int i = 0; i < 8; i++) {
-      // Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
-      ChessPieceContainer[i + 3] = new Pawn((i + 1), 2, 'W');
-    }
-
-    // ---- Black ---- //
-    ChessPieceContainer[11] = new King(5, 8, 'B');
-    ChessPieceContainer[12] = new Rook(1, 8, 'B');
-    ChessPieceContainer[13] = new Rook(8, 8, 'B');
-    for (int i = 0; i < 8; i++) {
-      // Initialize pawns at indexes 8-15, convert indexes to "user input" indexes
-      ChessPieceContainer[i + 14] = new Pawn((i + 1), 7, 'B');
-    }
-
-    // A PlacePiece function may be added in place, an ArrayList may also be used
-    // instead of an array
-    for (int i = 0; i < numPieces; i++) {
-      int xCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetXCoord(), 'X');
-      int yCoord = TranslatePieceCoordinates(ChessPieceContainer[i].GetYCoord(), 'Y');
-      playSquare[yCoord][xCoord].add(SymbolToLabel(ChessPieceContainer[i]), BorderLayout.CENTER);
-    }
-  }
-
   // Designed to be as compatible for different types of selection
   // selectPiece always generates a new copied piece based on the recent selection
   // Triggered by clicks
@@ -400,7 +357,6 @@ public class ChessFrame extends JFrame {
         for (int i = 0; i < numPieces; i++) {
           if (board[i].GetSymbol() == 'R' && piece.GetPlayerSide() == board[i].GetPlayerSide()
               && board[i].GetXCoord() == 1) {
-            System.out.println("Castle left");
             board[i].SetXCoord(4);
           }
         }
@@ -547,45 +503,6 @@ public class ChessFrame extends JFrame {
 
   }
 
-  public void EnPassant(int x, int y, int newX, int newY) {
-    /*
-     * // To access pawn only methods
-     * Pawn copiedPawn = (Pawn) copiedPiece;
-     * 
-     * // If a pawn has moved twice
-     * if ((copiedPawn.GetYCoord() == 2 && newY == 4) || (copiedPawn.GetYCoord() ==
-     * 7 && newY == 5)) {
-     * copiedPawn.MoveTwice(true);
-     * }
-     * 
-     * for (int i = 0; i < numPieces; i++) {
-     * // En Passant Right
-     * if (ChessPieceContainer[i].GetXCoord() == (x + 1) &&
-     * ChessPieceContainer[i].GetYCoord() == (y)
-     * && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice()
-     * == true) {
-     * if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
-     * ChessPieceContainer[i].RemovePiece();
-     * System.out.println("Piece taken!");
-     * }
-     * // En Passant left
-     * } else if (ChessPieceContainer[i].GetXCoord() == (x - 1) &&
-     * ChessPieceContainer[i].GetYCoord() == (y)
-     * && ChessPieceContainer[i].IsAlive() && ChessPieceContainer[i].IsMovedTwice()
-     * == true) {
-     * if (ChessPieceContainer[i].GetPlayerSide() != copiedPawn.GetPlayerSide()) {
-     * ChessPieceContainer[i].RemovePiece();
-     * System.out.println("Piece taken!");
-     * }
-     * }
-     * }
-     */
-  }
-
-  public void AddMovesToSet(Set<Integer> TheSet, ChessPiece piece) {
-
-  }
-
   public boolean CheckForCheckMates(char playerSide) {
     int copyIndex = -1;
     for (int i = 0; i < numPieces; i++) {
@@ -612,13 +529,7 @@ public class ChessFrame extends JFrame {
         }
       }
     }
-    // System.out.println(playerSide + " King is IN CHECKMATE");
-    // if (playerSide == 'B') {
-    // playerSide = 'W';
-    // } else {
-    // playerSide = 'B';
-    // }
-    // PrintWinnerDialog(playerSide);
+    
     return true;
   }
 
@@ -752,7 +663,6 @@ public class ChessFrame extends JFrame {
 
   // From piece coordinates to the playSquare 2D array
   private int TranslatePieceCoordinates(int coord, char direction) {
-    // Non-flipped
     if (direction == 'X') {
       // Shift the coordinate down by one to fit in the 2D array
       int translatedXCoord = (coord - 1);
@@ -768,7 +678,6 @@ public class ChessFrame extends JFrame {
 
   // From playSquare 2D array to piece coordinates
   private int TranslateBoardCoordinates(int coord, char direction) {
-    // Non-flipped
     if (direction == 'X') {
       // Shift the coordinate up by one to fit in the 2D array
       int translatedXCoord = (coord + 1);
@@ -856,7 +765,7 @@ public class ChessFrame extends JFrame {
               int yCoord = TranslateBoardCoordinates(i, 'Y');
               DetermineTurnOrder();
               selectPiece(xCoord, yCoord);
-              System.out.println("Turn Count: " + turnCount);
+              
             }
         // ---- Move/Deselect ---- //
         // If the piece is already selected
@@ -876,7 +785,7 @@ public class ChessFrame extends JFrame {
                   MakeMove(copiedPiece.GetXCoord(), copiedPiece.GetYCoord(), xCoord, yCoord, ChessPieceContainer,
                       copiedPiece);
                   turnCount++;
-                  System.out.println("New turn Count: " + turnCount);
+                  
                   PlayMoveSound();
 
                   // DetermineTurnOrder();
@@ -885,7 +794,7 @@ public class ChessFrame extends JFrame {
                   break;
                   // ---- Deselect ----
                 } else if (xCoord == copiedPiece.GetXCoord() && yCoord == copiedPiece.GetYCoord()) {
-                  System.out.println("Deselect Turn Count: " + turnCount);
+                  
                   ResetBoardBackground();
                   UpdatePieces();
                   break;
@@ -908,7 +817,6 @@ public class ChessFrame extends JFrame {
       } else {
         if (CheckForCheckMates('B') || CheckForCheckMates('W')) {
           PrintStalemateDialog();
-          System.out.println("Stalemate");
         }
         playCheckSound = false;
       }
