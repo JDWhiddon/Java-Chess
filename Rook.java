@@ -6,6 +6,7 @@ import javax.swing.*;
 
 public class Rook extends ChessPiece {
 	private char symbol = 'R';
+	private boolean canCastleWithKing = false;
 	// -- Board Bounds -- //
 	final int leftBound = 1;
 	final int rightBound = 9;
@@ -30,6 +31,11 @@ public class Rook extends ChessPiece {
 
 	public char GetSymbol() {
 		return symbol;
+	}
+	
+	// Sets the castle status with the king
+	void setCastleStatus(boolean cwk){
+		canCastleWithKing = cwk;
 	}
 
 	// To reset the bounds for the next valid coordinate search

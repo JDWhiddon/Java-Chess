@@ -8,9 +8,9 @@ import javax.swing.*;
 
 public class King extends ChessPiece {
 	private char symbol = 'K';
-	// Is determined by hasMoved
+	// Is determined by hasMoved or check
 	private boolean canCastle = true;
-	// First move only
+	// First move of king only
 	private boolean hasMoved = false;
 	// -- Board Bounds -- //
 	final int leftBound = 1;
@@ -18,7 +18,7 @@ public class King extends ChessPiece {
 	final int lowerBound = 1;
 	final int upperBound = 8;
 	// To cancel the direction of a move
-	boolean[] directionCancel = new boolean[8];
+	boolean[] directionCancel = new boolean[10];
 
 	public King(int x, int y, char ps) {
 		super(x, y, ps);
@@ -28,10 +28,20 @@ public class King extends ChessPiece {
 	public char GetSymbol() {
 		return symbol;
 	}
+	
+	// Sets the castle status, King cannot castle in check
+	void setCastleStatus(boolean cs){
+		canCastle = cs;
+	}
+	
+	// Sets the castle status, King cannot castle once it moves from its initial position
+	void setKingMoveStatus(boolean ms){
+		hasMoved = ms;
+	}
 
 	// Set all directionCancel indicators to false
 	public void initializeDirectionCancel() {
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 10; i++) {
 			directionCancel[i] = false;
 		}
 	}
@@ -124,11 +134,35 @@ public class King extends ChessPiece {
 					directionCancel[7] = true;
 			}
 		}
+		
+		DetectCastle(x, y, cp);
+	}
+	
+	public void DetectCastle(int x, int y, ChessPiece cp){
+		if (playerSide == 'W' && cp.IsAlive()) {
+			// (5,1) -> (7,1)
+			if((cp.GetXCoord() == x + 2 && cp.GetYCoord() == y) || directionCancel[2] == true){
+				directionCancel[8] = true;
+			}
+			// (5,1) -> (3,1)
+			if(((cp.GetXCoord() == x - 2 || cp.GetXCoord() == x - 3) && cp.GetYCoord() == y) || directionCancel[3] == true){
+				directionCancel[9] = true;
+			}
+		}
+		else if (playerSide == 'B' && cp.IsAlive()){
+			// (5,8) -> (7,8)
+			if((cp.GetXCoord() == x + 2 && cp.GetYCoord() == y) || directionCancel[2] == true){
+				directionCancel[8] = true;
+			}
+			// (5,1) -> (3,1)
+			if(((cp.GetXCoord() == x - 2 || cp.GetXCoord() == x - 3) && cp.GetYCoord() == y) || directionCancel[3] == true){
+				directionCancel[9] = true;
+			}
+		}
 	}
 
 	// Search each valid move within the bounds of the board
 	public ArrayList<int[]> TheKingsMoves(int x, int y, ChessPiece[] ChessPieceContainer, int numPieces) {
-		initializeDirectionCancel();
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
 		for (int i = 0; i < numPieces; i++) {
@@ -175,6 +209,18 @@ public class King extends ChessPiece {
 			if (directionCancel[7] == false)
 				coordinatesList.add(new int[] { x - 1, y - 1 });
 		}
+		if (x == 5 && (y == 1 || y == 8)) {
+			// Assuming at inital position
+			// Castle Right
+			if (directionCancel[8] == false && hasMoved == false && canCastle == true){
+				coordinatesList.add(new int[] { x + 2, y });
+			}
+			// Castle Left
+			if (directionCancel[9] == false && hasMoved == false && canCastle == true){
+				coordinatesList.add(new int[] { x - 2, y });
+			}
+		}
+		
 		// Reset all directionCancel indicators to false for the next instance
 		// of a move
 		initializeDirectionCancel();
