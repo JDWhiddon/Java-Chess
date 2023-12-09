@@ -1,0 +1,20 @@
+Welcome to Chess made by John Whiddon and Harold Lim!
+
+Rules:
+We are implementing standard chess rules. En passant is disabled, as it is not a standard chess move. White always moves first.
+
+How to use:
+The game begins as soon as you start the -jar file. Just click on the piece to see its available moves, which are displayed in yellow
+on valid squares.
+
+How to compile:
+Because our implementation does use HashSets to check if pieces are on top of eachother in order to take advantage of the O(1) lookup time
+of hash sets, we need to compile our code uisn the -Xlint:unchecked flag. 
+    ex: javac -Xlint:unchecked *.java
+This is because the hash sets have an unchecked conversions on these lines:
+    Set<Integer> OpponentSet = new HashSet();
+This does not cause any errors during runtime.
+
+Extra features:
+For the extra features, we added four different themes to customize your board with to make it more fun. We also added
+additional moving, checking, and winning sounds to make the game more lively. 

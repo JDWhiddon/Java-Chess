@@ -15,6 +15,7 @@ public abstract class ChessPiece {
     protected boolean hasMoved = false;
     protected boolean canMoveOnTurn = false;
     protected int turn;
+    protected boolean canCastle;
     // May mess with the JLabels in each specific JPanel later
     protected JLabel jlabelCopy;
 
@@ -75,6 +76,14 @@ public abstract class ChessPiece {
 
     public void SetSelection(boolean s) {
         isSelected = s;
+    }
+
+    void setCastleStatus(boolean cs) {
+        canCastle = cs;
+    }
+
+    boolean getCastleStatus() {
+        return canCastle;
     }
 
     public void RemovePiece() {

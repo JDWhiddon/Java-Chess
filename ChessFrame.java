@@ -391,6 +391,28 @@ public class ChessFrame extends JFrame {
       piece.SetYCoord(newY);
       piece.SetXCoord(newX);
     }
+    // Castling interactions
+    if (piece.getClass().getName() == "King" && ((newX - x > 1) || (x - newX > 1))) {
+      // Rook to the left
+      // Get the rook
+      // Move it to castled position
+      if (x - newX > 0) {
+        for (int i = 0; i < numPieces; i++) {
+          if (board[i].GetSymbol() == 'R' && piece.GetPlayerSide() == board[i].GetPlayerSide()
+              && board[i].GetXCoord() == 1) {
+            System.out.println("Castle left");
+            board[i].SetXCoord(4);
+          }
+        }
+      } else {
+        for (int i = 0; i < numPieces; i++) {
+          if (board[i].GetSymbol() == 'R' && piece.GetPlayerSide() == board[i].GetPlayerSide()
+              && board[i].GetXCoord() == 8) {
+            board[i].SetXCoord(6);
+          }
+        }
+      }
+    }
     UpdatePieces();
   }
 
@@ -646,6 +668,7 @@ public class ChessFrame extends JFrame {
             break;
         }
         tempBoard[i].SetAlive(realBoard[i].IsAlive());
+        tempBoard[i].setCastleStatus(false);
       }
       int tempPiece = returnNewCopiedPiece(tempBoard);
 
@@ -696,16 +719,6 @@ public class ChessFrame extends JFrame {
     if (OpponentSet.contains((kingY * 8) + kingX)) {
       return true;
     }
-    // for (int[] theirMoves : opponentsMoves) {
-    // int theirX = theirMoves[0];
-    // int theirY = theirMoves[1];
-    // // if (kingX == theirX && kingY == theirY) {
-    // // // Move shouldnt be added to the available moves arr
-    // // playSquare[8 - kingY][kingX - 1].setBackground(checkColor);
-    // // UpdatePieces();
-    // // return true;
-    // // }
-    // }
     return false;
   }
 
