@@ -149,7 +149,6 @@ public class ChessFrame extends JFrame {
     JMenuBar bar = new JMenuBar();
     setJMenuBar(bar);
     bar.add(themeMenu);
-
   }
 
   private class ItemHandler implements ActionListener {
@@ -375,14 +374,8 @@ public class ChessFrame extends JFrame {
 
     // -- Piece Selection -- //
     SelectedCoordinatesList = coordinatesList;
-    // if (copiedPiece.GetSymbol() != 'K') {
-    // SelectedCoordinatesList = CheckForMates(coordinatesList,
-    // copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
-    // } else {
-    // SelectedCoordinatesList = coordinatesList;
-    // }
     SelectedCoordinatesList = CheckForMates(coordinatesList,
-        copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece, 0);
+        copiedPiece.GetPlayerSide(), ChessPieceContainer, selectedPiece);
 
     for (int[] coordinates : SelectedCoordinatesList) {
       playSquare[8 - coordinates[1]][coordinates[0] - 1].setBackground(validMoveColor);
@@ -426,6 +419,24 @@ public class ChessFrame extends JFrame {
       CheckForPromotion(newX, newY);
     }
     return canMove;
+  }
+
+  public void PrintStalemateDialog() {
+    ImageIcon StaleMateIcon = new ImageIcon(ChessFrame.class.getResource("/Resources/stalemate.png"));
+    String[] YesOrNo = { "Play again", "Quit" };
+    int n = JOptionPane.showOptionDialog(this, "Stalemate. It's a tie!",
+        "Stalemate", JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE, StaleMateIcon, YesOrNo, YesOrNo[0]);
+    if (n == -1)
+      n = 1;
+
+    if (n == 1) {
+      System.exit(0);
+    } else {
+      DefaultGameSetup(ChessPieceContainer);
+      turnCount = 1;
+      UpdatePieces();
+    }
   }
 
   public void PrintWinnerDialog(char winner) {
@@ -571,52 +582,26 @@ public class ChessFrame extends JFrame {
         ArrayList<int[]> TempReturnMoves = CheckForMates(
             ChessPieceContainer[i].ValidMoves(tempX, tempY, ChessPieceContainer, numPieces),
             ChessPieceContainer[i].GetPlayerSide(), ChessPieceContainer,
-            ChessPieceContainer[i], 0);
+            ChessPieceContainer[i]);
         if (TempReturnMoves.size() > 0) {
-          copiedPiece = ChessPieceContainer[copyIndex];
-
+          if (copyIndex > -1)
+            copiedPiece = ChessPieceContainer[copyIndex];
           return false;
         }
       }
     }
-    System.out.println(playerSide + " King is IN CHECKMATE");
-    if (playerSide == 'B') {
-      playerSide = 'W';
-    } else {
-      playerSide = 'B';
-    }
-    PrintWinnerDialog(playerSide);
+    // System.out.println(playerSide + " King is IN CHECKMATE");
+    // if (playerSide == 'B') {
+    // playerSide = 'W';
+    // } else {
+    // playerSide = 'B';
+    // }
+    // PrintWinnerDialog(playerSide);
     return true;
   }
 
   public ArrayList<int[]> CheckForMates(ArrayList<int[]> coordinatesList, char playerSide,
-      ChessPiece[] realBoard, ChessPiece selectedPiece, int RecursiveCall) {
-    // if (RecursiveCall == 1 && (isKingInCheck('W', ChessPieceContainer) ||
-    // isKingInCheck('B', ChessPieceContainer))) {
-    // boolean canMove = false;
-    // for (int i = 0; i < 32; i++) {
-    // if (ChessPieceContainer[i].GetPlayerSide() == playerSide) {
-    // int tempX = ChessPieceContainer[i].GetXCoord();
-    // int tempY = ChessPieceContainer[i].GetYCoord();
-    // ArrayList<int[]> TempReturnMoves = CheckForMates(
-    // ChessPieceContainer[i].ValidMoves(tempX, tempY, realBoard, numPieces),
-    // ChessPieceContainer[i].GetPlayerSide(), realBoard,
-    // ChessPieceContainer[i], 0);
-    // if (TempReturnMoves.size() > 0) {
-    // canMove = true;
-    // }
-    // }
-    // }
-    // if (canMove) {
-
-    // } else {
-    // System.out.println("Checkmate");
-    // if (isKingInCheck('W', realBoard))
-    // PrintWinnerDialog('B');
-    // else
-    // PrintWinnerDialog('W');
-    // }
-    // }
+      ChessPiece[] realBoard, ChessPiece selectedPiece) {
     // This ArrayList will store all of the moves that WONT put the king in check
     ArrayList<int[]> ReturnMoves = new ArrayList<>();
     int kingX = 0;
@@ -899,13 +884,19 @@ public class ChessFrame extends JFrame {
       ArrayList<int[]> tempMoves = new ArrayList<>();
 
       if (isKingInCheck('W', ChessPieceContainer) || isKingInCheck('B', ChessPieceContainer)) {
-        CheckForCheckMates('B');
-        CheckForCheckMates('W');
+        if (CheckForCheckMates('B'))
+          PrintWinnerDialog('W');
+        if (CheckForCheckMates('W'))
+          PrintWinnerDialog('B');
         if (!playCheckSound) {
           PlayCheckSound();
           playCheckSound = true;
         }
       } else {
+        if (CheckForCheckMates('B') || CheckForCheckMates('W')) {
+          PrintStalemateDialog();
+          System.out.println("Stalemate");
+        }
         playCheckSound = false;
       }
     }
