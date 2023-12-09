@@ -85,6 +85,10 @@ public abstract class ChessPiece {
         return isAlive;
     }
 
+    public void SetAlive(boolean tf) {
+        isAlive = tf;
+    }
+
     public boolean GetSelection() {
         return isSelected;
     }

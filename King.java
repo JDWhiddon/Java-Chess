@@ -128,6 +128,7 @@ public class King extends ChessPiece {
 
 	// Search each valid move within the bounds of the board
 	public ArrayList<int[]> TheKingsMoves(int x, int y, ChessPiece[] ChessPieceContainer, int numPieces) {
+		initializeDirectionCancel();
 		ArrayList<int[]> coordinatesList = new ArrayList<>();
 		// -- Search the whole container for occupied spaces -- //
 		for (int i = 0; i < numPieces; i++) {

@@ -6,7 +6,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.lang.reflect.Array;
 import java.nio.channels.OverlappingFileLockException;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -30,8 +33,6 @@ public class ChessFrame extends JFrame {
   Color green = new Color(118, 150, 86);
   Color validMoveColor = new Color(255, 255, 0);
   Color checkColor = new Color(255, 0, 0);
-  AudioInputStream audioInputStream;
-  File fileSound;
   Clip sound;
   boolean playCheckSound;
 
@@ -43,10 +44,12 @@ public class ChessFrame extends JFrame {
   private int themeIndex = 0;
   private ButtonGroup themeButtonGroup;
 
+  // These sounds are used from this forum post :
+  // https://www.chess.com/forum/view/general/chessboard-sound-files
   public void PlayMoveSound() {
     try {
-      fileSound = new File("Resources/move-self.wav");
-      audioInputStream = AudioSystem.getAudioInputStream(fileSound);
+      InputStream inputStream = ChessFrame.class.getResourceAsStream("/Resources/move-self.wav");
+      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(inputStream));
       sound = AudioSystem.getClip();
       sound.open(audioInputStream);
       sound.start();
@@ -58,8 +61,8 @@ public class ChessFrame extends JFrame {
 
   public void PlayCheckSound() {
     try {
-      fileSound = new File("Resources/check.wav");
-      audioInputStream = AudioSystem.getAudioInputStream(fileSound);
+      InputStream inputStream = ChessFrame.class.getResourceAsStream("/Resources/check.wav");
+      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(inputStream));
       sound = AudioSystem.getClip();
       sound.open(audioInputStream);
       sound.start();
@@ -71,8 +74,8 @@ public class ChessFrame extends JFrame {
 
   public void PlayWinSound() {
     try {
-      fileSound = new File("Resources/win.wav");
-      audioInputStream = AudioSystem.getAudioInputStream(fileSound);
+      InputStream inputStream = ChessFrame.class.getResourceAsStream("/Resources/win.wav");
+      AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new BufferedInputStream(inputStream));
       sound = AudioSystem.getClip();
       sound.open(audioInputStream);
       sound.start();
@@ -81,9 +84,6 @@ public class ChessFrame extends JFrame {
       System.out.println("Problem with finding winSound");
     }
   }
-
-  // This sound was used from this forum post :
-  // https://www.chess.com/forum/view/general/chessboard-sound-files
 
   /*
    * -- Container for the in play chess pieces --
@@ -410,7 +410,8 @@ public class ChessFrame extends JFrame {
       if (board[i].GetXCoord() == newX && board[i].GetYCoord() == newY && board[i].IsAlive()) {
         if (board[i].GetPlayerSide() != piece.GetPlayerSide()) {
           board[i].RemovePiece();
-          System.out.println("Piece taken!");
+          if (board[i] == ChessPieceContainer[i] && piece.getClass().getName() == "King")
+            System.out.println("Piece taken!");
         } else {
           canMove = false;
         }
@@ -430,9 +431,9 @@ public class ChessFrame extends JFrame {
   public void PrintWinnerDialog(char winner) {
     ImageIcon winnerIcon = new ImageIcon();
     if (winner == 'W') {
-      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/WKing.png"));
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("/Resources/WKing.png"));
     } else {
-      winnerIcon = new ImageIcon(ChessFrame.class.getResource("Resources/BKing.png"));
+      winnerIcon = new ImageIcon(ChessFrame.class.getResource("/Resources/BKing.png"));
     }
     JLabel no = new JLabel("Quit");
     String[] YesOrNo = { "Play again", "Quit" };
@@ -460,17 +461,17 @@ public class ChessFrame extends JFrame {
     ImageIcon bishop = new ImageIcon();
     ImageIcon rook = new ImageIcon();
     if (y == 8) {
-      queen = new ImageIcon(ChessFrame.class.getResource("Resources/WQueen.png"));
-      knight = new ImageIcon(ChessFrame.class.getResource("Resources/WKnight.png"));
-      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/WBishop.png"));
-      rook = new ImageIcon(ChessFrame.class.getResource("Resources/WRook.png"));
+      queen = new ImageIcon(ChessFrame.class.getResource("/Resources/WQueen.png"));
+      knight = new ImageIcon(ChessFrame.class.getResource("/Resources/WKnight.png"));
+      bishop = new ImageIcon(ChessFrame.class.getResource("/Resources/WBishop.png"));
+      rook = new ImageIcon(ChessFrame.class.getResource("/Resources/WRook.png"));
     }
     // If a pawn in on the top row, show black promotion box
     else if (y == 1) {
-      queen = new ImageIcon(ChessFrame.class.getResource("Resources/BQueen.png"));
-      knight = new ImageIcon(ChessFrame.class.getResource("Resources/BKnight.png"));
-      bishop = new ImageIcon(ChessFrame.class.getResource("Resources/BBishop.png"));
-      rook = new ImageIcon(ChessFrame.class.getResource("Resources/BRook.png"));
+      queen = new ImageIcon(ChessFrame.class.getResource("/Resources/BQueen.png"));
+      knight = new ImageIcon(ChessFrame.class.getResource("/Resources/BKnight.png"));
+      bishop = new ImageIcon(ChessFrame.class.getResource("/Resources/BBishop.png"));
+      rook = new ImageIcon(ChessFrame.class.getResource("/Resources/BRook.png"));
     }
     if (y == 1 || y == 8) {
       Object[] promotionOptions = { queen, knight, bishop, rook };
@@ -659,6 +660,7 @@ public class ChessFrame extends JFrame {
             tempBoard[i].SetSymbol('t');
             break;
         }
+        tempBoard[i].SetAlive(realBoard[i].IsAlive());
       }
       int tempPiece = returnNewCopiedPiece(tempBoard);
 
@@ -792,43 +794,43 @@ public class ChessFrame extends JFrame {
     if (playerSide == 'W') {
       switch (symbol) {
         case 'K':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/WKing.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/WKing.png"));
           break;
         case 'Q':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/WQueen.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/WQueen.png"));
           break;
         case 'N':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/WKnight.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/WKnight.png"));
           break;
         case 'R':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/WRook.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/WRook.png"));
           break;
         case 'B':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/WBishop.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/WBishop.png"));
           break;
         case 'P':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/WPawn.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/WPawn.png"));
           break;
       }
     } else if (playerSide == 'B') {
       switch (symbol) {
         case 'K':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/BKing.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/BKing.png"));
           break;
         case 'Q':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/BQueen.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/BQueen.png"));
           break;
         case 'N':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/BKnight.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/BKnight.png"));
           break;
         case 'R':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/BRook.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/BRook.png"));
           break;
         case 'B':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/BBishop.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/BBishop.png"));
           break;
         case 'P':
-          chessPiece = new ImageIcon(ChessFrame.class.getResource("Resources/BPawn.png"));
+          chessPiece = new ImageIcon(ChessFrame.class.getResource("/Resources/BPawn.png"));
           break;
       }
     }
