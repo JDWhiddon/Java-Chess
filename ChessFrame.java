@@ -702,7 +702,6 @@ public class ChessFrame extends JFrame {
         for (int[] moves : tempMoves) {
           int x = moves[0];
           int y = moves[1];
-          // opponentsMoves.add(new int[] { x, y });
           OpponentSet.add((y * 8) + x);
         }
       }

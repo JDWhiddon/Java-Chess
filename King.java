@@ -208,8 +208,17 @@ public class King extends ChessPiece {
 			for (int[] moves : tempMoves) {
 				int tempX = moves[0];
 				int tempY = moves[1];
-				// opponentsMoves.add(new int[] { tempX, tempY });
-				OpponentSet.add((tempY - 1) * 8 + tempX);
+				int x = ChessPieceContainer[i].GetXCoord();
+				int y = ChessPieceContainer[i].GetYCoord();
+				// Dont add the move directly in front of a pawn
+				if (ChessPieceContainer[i].getClass().getName() == "Pawn") {
+					if (tempX == x && (tempY == y - 1 || tempY == y + 1)) {
+					} else {
+						OpponentSet.add((tempY - 1) * 8 + tempX);
+					}
+				} else {
+					OpponentSet.add((tempY - 1) * 8 + tempX);
+				}
 			}
 		}
 
